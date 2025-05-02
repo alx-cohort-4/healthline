@@ -46,6 +46,7 @@ class TenantUser(TenantModelMixin, AbstractUser):
     country = models.CharField(max_length=255, null=False, blank=False)
     phonenumber = models.CharField(max_length=15, null=False, blank=False, unique=True, validators=[RegexValidator(regex=r'^\+?\d{9,15}$')])
     location  = models.TextField(null=False, blank=False)
+    # profile_photo = models.ImageField(upload_to="/photos", null=True, blank=True)
     subscription = models.CharField(max_length=50, null=False, blank=False, default="Basic")
     role = models.CharField(max_length=9, choices=ROLES_CHOICES, default="tenant")
     is_active = models.BooleanField(default=True)
@@ -103,19 +104,20 @@ class Patient(TenantModelMixin, models.Model):
     def clean(self):
         if self.date_of_birth > date.today():
             raise ValidationError(
-                {"date of birth": "Date of Birth cannot be in the future!"}
+                {"date_of_birth": "Date of Birth cannot be in the future!"}
             )
         return super().clean()
 
     # Strip for white spaces and set for organized data
     def save(self, *args, **kwargs):
-        self.full_clean()
         self.first_name = self.first_name.strip().capitalize()
         self.last_name = self.last_name.strip().capitalize()
         if self.email:
             self.email = self.email.strip().lower()
+        else:
+            self.email = None
         super().save(*args, **kwargs)
 
     # String representation of the object
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"     
+        return f"{self.first_name.strip().capitalize()} {self.last_name.strip().capitalize()}"     

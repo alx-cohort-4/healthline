@@ -4,3 +4,5 @@ PyJWT==2.10.1
 django-allauth==65.7.0
 psycopg2==2.9.10
 # pip install  --no-cache-dir django_multitenant
+# pip install cryptography
+# pip install pillow

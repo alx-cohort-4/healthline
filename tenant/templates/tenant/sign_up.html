@@ -1,0 +1,20 @@
+{% extends 'tenant/base.html' %}
+{% block title%}Sign Up{% endblock %}
+{% block main %}
+    <div class="container-fluid d-flex align-items-center justify-content-center" style="min-height: 90vh; background-color: rgba(0, 0, 82, 0.525);">
+        <div class="w-100" style="max-width: 500px;">
+            <div class="shadow p-4 rounded bg-white mx-3">
+               <form action="{% url 'tenant:signup' %}" method="POST" class="px-5 mt-5 w-70">
+                    {% csrf_token %}
+                    <p class="text-center" style="font-size: 1.3rem;">Signup</p>
+                    {% for field in form %}
+                        <label for="{{ field.id_for_label }}" class="mt-2">{{field.label}}</label>
+                        <span style="color: red;">{{ field.errors }}</span>
+                        {{field}}
+                    {% endfor %}
+                    <button type="submit" class="btn btn-success w-100">Signup</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
