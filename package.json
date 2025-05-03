@@ -20,6 +20,7 @@
     "vite": "^6.3.4"
   },
   "dependencies": {
+    "lucide-react": "^0.507.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

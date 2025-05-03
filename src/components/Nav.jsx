@@ -1,23 +1,62 @@
 import React from 'react';
+import { X, Menu } from "lucide-react";
+import { useState } from "react";
 
 const Nav = () => {
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+  const toggleNarbar = () => {
+    setMobileDrawerOpen(!mobileDrawerOpen)
+  };
+  
+  const navItems = [
+    { label: "Features", href: "#features" },
+    { label: "How it works", href: "#how-it-works" },
+    { label: "Contact Us", href: "#contact-us" }
+  ];
+  
   return (
     <nav className="w-full bg-white text-[#175cd3] flex items-center justify-between px-6 py-4 fixed top-0 left-0 shadow-md z-50">
       
-      <div className="text-xl font-bold">AI HealthLine</div>
+      <div className="text-xl font-bold z-[60]">AI HealthLine</div>
 
       
-      <ul className="flex space-x-6">
-        <li className="hover:bg-[#e6f0ff] px-3 py-2 rounded cursor-pointer active:bg-[#cce0ff]">Features</li>
-        <li className="hover:bg-[#e6f0ff] px-3 py-2 rounded cursor-pointer active:bg-[#cce0ff]">How it works</li>
-        <li className="hover:bg-[#e6f0ff] px-3 py-2 rounded cursor-pointer active:bg-[#cce0ff]">Contact Us</li>
+      <ul className="hidden lg:flex space-x-6 items-center">
+        {navItems.map((item) => (
+          <li key={item.label} className="hover:bg-[#e6f0ff] px-3 py-2 rounded cursor-pointer active:bg-[#cce0ff]">
+            <a href={item.href}>{item.label}</a>
+          </li>
+        ))}
       </ul>
 
       
-      <div className="flex space-x-4">
+      <div className="hidden lg:flex space-x-4">
         <button className="px-4 py-2 text-[#175cd3]">Login</button>
         <button className="px-4 py-2 bg-[#175cd3] text-white rounded">Sign Up</button>
       </div>
+
+      <button 
+        className="lg:hidden text-3xl font-bold text-[#175cd3] hover:bg-[#e6f0ff] px-3 py-2 rounded z-[60]" 
+        onClick={toggleNarbar}
+      >
+        {mobileDrawerOpen ? <X/> : <Menu/>}
+        
+      </button>
+
+      {mobileDrawerOpen && (
+        <div className="fixed right-0 top-0 z-[55] bg-white w-full h-[25rem] mt-20 p-12 flex flex-col justify-start items-start lg:hidden">
+          <ul className="space-y-6 text-left w-full">
+            {navItems.map((item) => (
+              <li key={item.label} className="hover:bg-[#e6f0ff] px-3 py-2 rounded cursor-pointer active:bg-[#cce0ff]">
+                <a href={item.href}>{item.label}</a>
+              </li>
+            ))}
+          </ul>
+          <div className="flex flex-col space-y-4 w-[100%] mt-8">
+            <button className="w-full px-4 py-2 text-[#175cd3] border border-[#175cd3] rounded">Login</button>
+            <button className="w-full px-4 py-2 bg-[#175cd3] text-white rounded">Sign Up</button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
