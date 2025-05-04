@@ -2,6 +2,12 @@ import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Button from "../components/ui/Button";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +15,7 @@ const Login = () => {
     password: "",
   });
 
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
@@ -21,8 +28,18 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const result = loginSchema.safeParse(formData);
+
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setErrors(fieldErrors);
+      return;
+    }
+    // Clear errors if valid
+    setErrors({});
     console.log("Logging in with:", formData);
-    // Add actual authentication logic here
+    // Proceed with authentication logic here
   };
 
   const togglePasswordVisibility = () => {
@@ -49,9 +66,13 @@ const Login = () => {
             value={formData.email}
             onChange={handleChange}
             placeholder="Enter your email address"
-            className="text-sm w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
+            className={`text-sm w-full p-3 border ${
+              errors.email ? "border-red-500" : "border-gray-300"
+            } rounded focus:outline-none focus:ring-2 focus:ring-blue-400`}
           />
+          {errors.email && (
+            <p className="text-xs text-red-500 mt-1">{errors.email[0]}</p>
+          )}
         </div>
 
         <div className="mb-2 relative">
@@ -64,8 +85,9 @@ const Login = () => {
             value={formData.password}
             onChange={handleChange}
             placeholder="Enter your password"
-            className="text-sm w-full p-3 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
+            className={`text-sm w-full p-3 pr-10 border ${
+              errors.password ? "border-red-500" : "border-gray-300"
+            } rounded focus:outline-none focus:ring-2 focus:ring-blue-400`}
           />
           <span
             onClick={togglePasswordVisibility}
@@ -73,6 +95,9 @@ const Login = () => {
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
+          {errors.password && (
+            <p className="text-xs text-red-500 mt-1">{errors.password[0]}</p>
+          )}
         </div>
 
         <div className="flex justify-end mb-2">
