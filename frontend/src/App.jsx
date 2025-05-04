@@ -1,24 +1,22 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
-import AuthLayout from "./components/Layout/AuthLayout";
-import Button from "./components/ui/Button";
-import EmailConfirmation from "./pages/EmailConfirmation";
+import { Routes, Route, Navigate } from "react-router-dom";
+import HeroSection from "./components/landing-page/HeroSection";
 import LoginPage from "./pages/LoginPage";
+import EmailConfirmation from "./components/auth/EmailConfirmation";
 
 const App = () => {
   return (
-    <div>
+    <div className="min-h-screen">
       <Routes>
-        <Route path="/" element={<AuthLayout />}>
-          
-        <Route path="/login" element={<LoginPage />} />
-
-          <Route index element={<Button>Home</Button>} />
-          <Route path="features" element={<div>Features</div>} />
-          <Route path="how-it-works" element={<div>How It Works</div>} />
-          <Route path="contact-us" element={<div>Contact Us</div>} />
-          <Route path="email-confirmation" element={<EmailConfirmation />} />
+        <Route path="/" element={<AuthLayout />}>     
+         <Route index element={<Navigate to="/login" replace />} />
+         <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<div>Signup Page</div>} />
         </Route>
+        <Route path="/email-confirmation" element={<EmailConfirmation />} />
+        <Route path="/features" element={<div>Features Page</div>} />
+        <Route path="/" element={<Navigate to="/hero" replace />} />
+        <Route path="/hero" element={<HeroSection />} />
       </Routes>
     </div>
   );
