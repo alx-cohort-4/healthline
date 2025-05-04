@@ -8,11 +8,11 @@ const AuthLayout = () => {
       {/* Header */}
       <Nav />
       {/* Main Content */}
-      <div className="flex mt-25 min-h-[85vh] h-auto ">
-        <div className="bg-secondary rounded-xl grid place-content-center  text-white w-1/2">
+      <div className="flex mt-25 border border-border-color overflow-hidden rounded-xl min-h-[85vh] h-auto ">
+        <div className="bg-secondary  grid place-content-center  text-white w-1/2">
           AI HealthLine
         </div>
-        <div className="w-1/2 bg-white p-8">
+        <div className="w-1/2 flex flex-col justify-center bg-white p-8">
           <Outlet />
         </div>
       </div>
