@@ -1,0 +1,66 @@
+name: Deploy Vite React App to AWS EC2
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set deployment branch
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "DEPLOY_BRANCH=${{ github.base_ref }}" >> $GITHUB_ENV
+          else
+            echo "DEPLOY_BRANCH=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
+      - name: Setup SSH Access
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.SERVER_IP }} << 'EOF'
+            set -e
+
+            BRANCH="${{ env.DEPLOY_BRANCH }}"
+            APP_NAME="vite-app-\$BRANCH"
+            APP_PORT=\$([ "\$BRANCH" = "main" ] && echo "5000" || echo "3000")
+
+            # Install dependencies if not already
+            command -v node || curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && sudo apt-get install -y nodejs
+            command -v pnpm || npm install -g pnpm
+            command -v pm2 || npm install -g pm2
+            command -v git || sudo apt-get install -y git
+
+            # Clone or pull project
+            cd ~
+            if [ ! -d "my-vite-app" ]; then
+              git clone -b "\$BRANCH" https://github.com/alx-cohort-4/healthline.git my-vite-app
+            fi
+            cd my-vite-app
+            git checkout "\$BRANCH"
+            git pull origin "\$BRANCH"
+
+            # Install and build
+            pnpm install
+            pnpm build
+
+            # Serve app
+            pm2 delete "\$APP_NAME" || true
+            pm2 start "serve -s dist -l \$APP_PORT" --name "\$APP_NAME"
+          EOF

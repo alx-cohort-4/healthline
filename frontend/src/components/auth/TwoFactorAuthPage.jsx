@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Button from './ui/Button';
+import Button from '../ui/Button';
 
 const otpSchema = z.object({
   otp: z
@@ -69,8 +69,8 @@ const TwoFactorAuthPage = ({ onVerify, onBackToLogin, onResendOtp }) => {
   };
 
   return (
-    <div className='flex min-h-[85vh] h-auto border-black border-1 shadow-2xl rounded-2xl w-full ml-0'>
-    <div className=" mx-auto pt-40 pb-40  text-center bg-white ">
+    <div className='flex min-h-[85vh] h-auto w-full ml-0  bg-white'>
+    <div className=" mx-auto pt-40 pb-40 text-center ">
       <h2 className="text-4xl font-semibold mb-2">Two-Factor Authentication</h2>
       <p className="mb-6">Enter the 6-digit code sent to you to confirm your login</p>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -98,7 +98,7 @@ const TwoFactorAuthPage = ({ onVerify, onBackToLogin, onResendOtp }) => {
           ))}
         </div>
         {errors.otp && <p className="text-red-500 text-sm mb-2">{errors.otp.message}</p>}
-        <Button>Confirm</Button>
+        <Button className="w-full py-3 mt-2 mb-4">Confirm</Button>
       </form>
 
       <p className="mt-6">
