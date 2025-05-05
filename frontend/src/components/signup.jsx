@@ -23,6 +23,17 @@ const signupSchema = z
   });
 
 const countryOptions = [
+  { value: "Ghana", label: "Ghana" },
+  { value: "Nigeria", label: "Nigeria" },
+  { value: "Kenya", label: "Kenya" },
+  { value: "South Africa", label: "South Africa" },
+  { value: "Uganda", label: "Uganda" },
+  { value: "Tanzania", label: "Tanzania" },
+  { value: "Zimbabwe", label: "Zimbabwe" },
+  { value: "Rwanda", label: "Rwanda" },
+  { value: "Zambia", label: "Zambia" },
+  { value: "Cameroon", label: "Cameroon" },
+  { value: "Senegal", label: "Senegal" },
   { value: "United States", label: "United States" },
   { value: "Canada", label: "Canada" },
   { value: "United Kingdom", label: "United Kingdom" },
