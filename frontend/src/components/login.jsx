@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import Button from "../components/ui/Button";
+import React from "react";
+import Button from "./ui/Button";
+import Input from "./ui/Input";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -10,45 +12,31 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
-  const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    mode: "onBlur",
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const result = loginSchema.safeParse(formData);
-
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors;
-      setErrors(fieldErrors);
-      return;
-    }
-    // Clear errors if valid
-    setErrors({});
-    console.log("Logging in with:", formData);
-    // Proceed with authentication logic here
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
+  const onSubmit = (data) => {
+    console.log("Logging in with:", data);
   };
 
   return (
     <div className="flex w-full bg-white px-4">
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg  w-full ">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white rounded-lg w-full"
+      >
         <h2 className="text-3xl font-bold text-center mb-2 text-gray-800">
           Login
         </h2>
@@ -56,49 +44,24 @@ const Login = () => {
           Enter your email and password to login
         </p>
 
-        <div className="mb-4">
-          <p className="text-sm text-gray-600 mb-1">
-            Email<span className="text-red-500">*</span>
-          </p>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter your email address"
-            className={`text-sm w-full p-3 border ${
-              errors.email ? "border-red-500" : "border-gray-300"
-            } rounded focus:outline-none focus:ring-2 focus:ring-blue-400`}
-          />
-          {errors.email && (
-            <p className="text-xs text-red-500 mt-1">{errors.email[0]}</p>
-          )}
-        </div>
+        <Input
+          label="Email"
+          type="email"
+          placeholder="Enter your email address"
+          required
+          error={errors.email?.message}
+          {...register("email")}
+        />
 
-        <div className="mb-2 relative">
-          <p className="text-sm text-gray-600 mb-1">
-            Password<span className="text-red-500">*</span>
-          </p>
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-            className={`text-sm w-full p-3 pr-10 border ${
-              errors.password ? "border-red-500" : "border-gray-300"
-            } rounded focus:outline-none focus:ring-2 focus:ring-blue-400`}
-          />
-          <span
-            onClick={togglePasswordVisibility}
-            className="absolute right-3 top-10 transform -translate-y-1/2 cursor-pointer text-gray-500 mt-3"
-          >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </span>
-          {errors.password && (
-            <p className="text-xs text-red-500 mt-1">{errors.password[0]}</p>
-          )}
-        </div>
+        <Input
+          label="Password"
+          type="password"
+          placeholder="Enter your password"
+          required
+          showPasswordToggle
+          error={errors.password?.message}
+          {...register("password")}
+        />
 
         <div className="flex justify-end mb-2">
           <button
