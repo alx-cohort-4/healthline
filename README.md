@@ -10,7 +10,8 @@ This project consists of both frontend and backend components, with separate dev
 
 You should have the following programs installed:
 
-- [nodejs](https://nodejs.org/)>=20.0.0
+- [pip](django)
+- [pip] (django)
 - [pnpm](https://pnpm.io/)>=9.4.0
 
 ### Setup Instructions
