@@ -32,7 +32,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex w-full bg-white px-4">
+    <div className="flex w-full max-md:w-full bg-white ">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white rounded-lg w-full"
@@ -67,13 +67,13 @@ const Login = () => {
           <button
             type="button"
             onClick={() => navigate("/forgot-password")}
-            className="text-xs text-blue-600 hover:underline"
+            className="text-xs cursor-pointer text-primary hover:underline"
           >
             Forgot password?
           </button>
         </div>
 
-        <Button type="submit" className="w-full mb-2 py-4 mt-2">
+        <Button type="submit" className="w-full mb-2 min-h-10 py-4 mt-2">
           Login
         </Button>
 
@@ -82,7 +82,7 @@ const Login = () => {
           <button
             type="button"
             onClick={() => navigate("/signup")}
-            className="text-xs ml-1 text-blue-600 font-semibold hover:underline"
+            className="text-xs ml-1 cursor-pointer text-primary font-semibold hover:underline"
           >
             Sign Up
           </button>
