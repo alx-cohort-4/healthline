@@ -72,11 +72,8 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex w-full bg-white px-4">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="bg-white rounded-lg w-full"
-      >
+    <div className="flex w-full bg-white">
+      <form onSubmit={handleSubmit(onSubmit)} className="rounded-lg w-full">
         <h2 className="text-3xl font-bold text-center mb-2 text-gray-800">
           Sign Up
         </h2>
@@ -154,7 +151,7 @@ const Signup = () => {
           {...register("confirmPassword")}
         />
 
-        <Button type="submit" className="w-full mb-2 py-4 mt-2">
+        <Button type="submit" className="w-full mb-2 min-h-10 py-4 mt-2">
           Create Account
         </Button>
 
@@ -165,7 +162,7 @@ const Signup = () => {
           <button
             type="button"
             onClick={() => navigate("/login")}
-            className="text-xs ml-1 text-blue-600 font-semibold hover:underline"
+            className="text-xs ml-1 text-primary py-4 font-semibold hover:underline"
           >
             Login
           </button>

@@ -15,7 +15,7 @@ const Nav = () => {
   ];
 
   return (
-    <nav className="w-full bg-white text-primary flex items-center justify-between px-25 py-4 fixed top-0 left-0 shadow-md z-50">
+    <nav className="w-full bg-white text-primary flex items-center justify-between px-4 md:px-12 lg:px-25 py-4 fixed top-0 left-0 shadow-md z-50">
       <div className="text-xl font-bold z-[60]">AI HealthLine</div>
 
       <ul className="hidden lg:flex space-x-6 items-center">
