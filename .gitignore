@@ -176,3 +176,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+#grandkojo-backend
+my_requirements.txt
+healthline_env
