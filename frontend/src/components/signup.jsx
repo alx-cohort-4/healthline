@@ -31,7 +31,6 @@ const countryOptions = [
   { value: "Tanzania", label: "Tanzania" },
   { value: "Zimbabwe", label: "Zimbabwe" },
   { value: "Rwanda", label: "Rwanda" },
-  { value: "Zambia", label: "Zambia" },
   { value: "Cameroon", label: "Cameroon" },
   { value: "Senegal", label: "Senegal" },
   { value: "United States", label: "United States" },
