@@ -136,10 +136,8 @@ LOGIN_URL = "/tenant/login/"
 LOGOUT_REDIRECT_URL = "/tenant/login/"
 
 CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "https://sub.example.com",
-    "http://localhost:8080",
-    "http://127.0.0.1:9000",
+    "https://healthline-nu.vercel.app",
+    "http://127.0.0.1:3000",
 ]
 
 # CORS_ALLOWED_ORIGIN_REGEXES = [
