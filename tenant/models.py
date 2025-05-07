@@ -38,6 +38,9 @@ class TenantUser(TenantModelMixin, AbstractUser):
         ("developer", "Developer")
     ]
     username = None
+    email = None
+    first_name = None
+    last_name = None
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant_id = "id"
     clinic_name = models.CharField(max_length=255, null=False, blank=False)
@@ -47,6 +50,7 @@ class TenantUser(TenantModelMixin, AbstractUser):
     phonenumber = models.CharField(max_length=16, null=False, blank=False, unique=True, validators=[RegexValidator(regex=r'^\+\d{9,15}$')])
     location  = models.TextField(null=False, blank=False)
     subscription = models.CharField(max_length=50, null=False, blank=False, default="Basic")
+    email_verified = models.BooleanField(default=False)
     role = models.CharField(max_length=9, choices=ROLES_CHOICES, default="tenant")
     is_active = models.BooleanField(default=True)
     # Set default to false incase it is a tenant data

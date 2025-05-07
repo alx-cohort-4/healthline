@@ -15,6 +15,7 @@ def create_demo_tenant_and_patient(apps, schema_editor):
         location="Ikeja, Lagos",
         # profile_photo = "ndufkjfijfjfoijeeoni"
         password="porkDemoPass12345678",  
+        email_verified = False,
         is_active=True,
         is_staff=False,
     )
