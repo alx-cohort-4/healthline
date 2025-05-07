@@ -180,3 +180,5 @@ cython_debug/
 #grandkojo-backend
 my_requirements.txt
 healthline_env
+tt.py
+dump.rdb
