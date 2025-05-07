@@ -23,7 +23,7 @@ const Input = forwardRef(
     const inputType = type === "password" && showPassword ? "text" : type;
 
     return (
-      <div className="mb-4">
+      <div className="mb-4 w-auto">
         {label && (
           <p className="text-sm text-gray-600 mb-1">
             {label}
@@ -36,7 +36,9 @@ const Input = forwardRef(
             ref={ref}
             className={cn(
               "text-sm w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400",
-              error ? "border-red-500" : "border-gray-300",
+              error
+                ? "border-red-500 bg-red-500/5 focus:ring-1 focus:ring-red-400"
+                : "border-gray-300",
               type === "password" && "pr-10"
             )}
             {...props}
