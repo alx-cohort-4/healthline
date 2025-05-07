@@ -10,8 +10,10 @@ from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse, Http404
 from datetime import date
+import os, jwt
 from .models import TenantUser, Patient
-from .token import send_email
+# from .token import send_email
+from .tasks import send_email
 from . import forms
 
 class HomeView(LoginRequiredMixin, generic.ListView, FormView):
@@ -37,26 +39,37 @@ class HomeView(LoginRequiredMixin, generic.ListView, FormView):
         return Patient.objects.filter(tenant_user=tenant)
     
 def testing(request):
-    email = request.user
+    email = request.user.clinic_email
     username = request.user.clinic_name
-    send_email(email=email, user=username)
+    send_email.delay(email=email, user=username)
     return render(request, "tenant/email_message.html", {'email': email, 'name': username})
 
 class SignupPage(FormView):
     template_name = "tenant/sign_up.html"
     form_class = forms.TenantUserForm
-    success_url = "tenant:home"
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_form(self.form_class)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            print("Logged user in")
-            messages.success(request, message=f"Successfully logged in as {user.clinic_name}")
-            return redirect(reverse_lazy(self.success_url))
-        print(form.errors)
-        return super().post(request, *args, **kwargs)
+    success_url = reverse_lazy("tenant:home")
+    
+    def form_valid(self, form):
+        user = form.save()
+        login(self.request, user)
+        messages.success(self.request, f"Successfully logged in as {user.clinic_name}")
+        
+        # Send verification email
+        email = user.clinic_email
+        username = user.clinic_name
+        send_email.delay(email=email, user=username)
+        return render(self.request, "tenant/email_message.html", {'email': email, 'name': username})
+    # def post(self, request, *args, **kwargs):
+    #     form = self.get_form(self.form_class)
+    #     if form.is_valid():
+    #         user = form.save()
+    #         login(request, user)
+    #         print("Logged user in")
+    #         messages.success(request, message=f"Successfully logged in as {user.clinic_name}")
+    #         return testing()
+    #         return redirect(reverse_lazy(self.success_url))
+    #     print(form.errors)
+    #     return super().post(request, *args, **kwargs)
     
 class LoginPage(FormView):
     template_name = "tenant/login.html"
@@ -100,6 +113,31 @@ class PatientFormView(LoginRequiredMixin, FormView):
                 messages.success(request, message=f"{patient} has been added to list successfully")
                 return redirect(reverse_lazy(self.success_url))
         return super().post(request, *args, **kwargs)
+    
+def VerifyEmailComplete(request):
+    token = request.GET.get("token")
+    with open('public.pem', 'r') as pub_file:
+        public_key = pub_file.read()
+    try:
+        payload = jwt.decode(token, public_key, os.getenv('ALGO'))
+        user = payload.get("sub")
+    except jwt.ExpiredSignatureError:
+        return HttpResponse("Token has expired", status=400)
+    except jwt.InvalidTokenError:
+        return HttpResponse("Invalid token", status=400)
+    
+    try:
+        user_exists = TenantUser.objects.get(clinic_email=user)
+        if user_exists:
+            # print("User Exists")
+            # from django.contrib.auth import login
+            # login(request, user_exists)
+            return redirect("tenant:home")
+    except TenantUser.DoesNotExist:
+        return HttpResponse("Tenant does not exist", status=404)
+    # res =verify_email.delay(token)
+    # try:
+    # return HttpResponse(res)
     
 @login_required
 def logout_user(request):
