@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import EmailConfirmation from "./components/auth/EmailConfirmation";
 import AuthLayout from "./components/Layout/AuthLayout";
+import HardworkingSection from './components/landing-page/HardworkingSection';
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/features" element={<div>Features Page</div>} />
         <Route path="/" element={<Navigate to="/hero" replace />} />
         <Route path="/hero" element={<HeroSection />} />
+        <Route path="/hardworking" element={<HardworkingSection />} />
       </Routes>
     </div>
   );
