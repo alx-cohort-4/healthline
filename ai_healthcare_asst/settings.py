@@ -119,3 +119,11 @@ EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
 
 LOGIN_URL = "/tenant/login/"
 LOGOUT_REDIRECT_URL = "/tenant/login/"
+
+CELERY_BROKER_URL="redis://localhost:6379/0"
+
+SIMPLE_JWT = {
+        'SIGNING_KEY': open('private.pem', 'r').read(),
+        'VERIFYING_KEY': open('public.pem', 'r').read(),
+        'ALGORITHM': os.getenv('ALGO')
+    }
