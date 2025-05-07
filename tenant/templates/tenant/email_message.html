@@ -1,6 +1,27 @@
 {% extends 'tenant/base.html' %}
 {% block title%}Login{% endblock %}
 {% block main %}
+{% for message in messages %}
+
+<div class="alert 
+        {% if message.tags == 'info' %}alert-danger
+        {% else %}alert-{{ message.tags }}{% endif %}
+        alert-dismissible fade show d-flex justify-content-between align-items-center w-100"
+    role="alert">
+    
+        <div>{{ message }}</div>
+    <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<div class="alert 
+        {% if message.tags == 'error' %}alert-danger
+        {% else %}alert-{{ message.tags }}{% endif %}
+        alert-dismissible fade show d-flex justify-content-between align-items-center w-100"
+    role="alert">
+    
+        <div>{{ message }}</div>
+    <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
 <div class="container-fluid d-flex align-items-center justify-content-center" style="min-height: 100vh; background-color: rgba(0, 0, 82, 0.525);">
     <div class="w-100" style="max-width: 500px;">
         <div class="shadow p-4 rounded bg-white mx-3 mt-5"> 

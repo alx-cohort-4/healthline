@@ -34,6 +34,9 @@ class HomeView(LoginRequiredMixin, generic.ListView, FormView):
         try:
             # Ensure that tenant really exist
             tenant = TenantUser.objects.get(clinic_email=self.request.user)
+            if tenant.email_verified == False:
+                messages.error(self.request, message="Email not verified. Please verify your email address")
+                # return redirect(reverse_lazy("tenant:verify_email"))
         except TenantUser.DoesNotExist:
             raise Http404("Tenant does not exist")
         return Patient.objects.filter(tenant_user=tenant)
@@ -41,8 +44,13 @@ class HomeView(LoginRequiredMixin, generic.ListView, FormView):
 def testing(request):
     email = request.user.clinic_email
     username = request.user.clinic_name
-    send_email.delay(email=email, user=username)
-    return render(request, "tenant/email_message.html", {'email': email, 'name': username})
+    email_verified = request.user.email_verified
+    if email_verified == False:
+        send_email.delay(email=email, user=username)
+        return render(request, "tenant/email_message.html", {'email': email, 'name': username})
+    else:
+        messages.success(request, message="Email verified successfully")
+        return redirect("tenant:home")
 
 class SignupPage(FormView):
     template_name = "tenant/sign_up.html"
@@ -81,13 +89,18 @@ class LoginPage(FormView):
         if form.is_valid():
             email = form.cleaned_data.get('clinic_email')
             password = form.cleaned_data.get('password')
-            print(email, password)
+            # print(email, password)
             user = authenticate(request, clinic_email=email, password=password)
-            if user:
+            if user and user.email_verified == True:
                 login(request, user)
                 messages.success(request, message=f"Successfully logged in as {user.clinic_name}")
                 return redirect(reverse_lazy(self.success_url))
-            messages.error(request, message="Email or password is incorrect")
+            else:
+                # Send verification email regardless of whether user exists or not
+                send_email.delay(email=email, user=email.split('@')[0])
+                messages.info(request, message="If an account exists with this email, a verification link has been sent.")
+                return render(request, "tenant/email_message.html", {'email': email, 'name': email.split('@')[0]})
+        messages.error(request, message="Email or password is incorrect")
         return self.form_invalid(form)
 
 class PatientFormView(LoginRequiredMixin, FormView):
@@ -130,8 +143,10 @@ def VerifyEmailComplete(request):
         user_exists = TenantUser.objects.get(clinic_email=user)
         if user_exists:
             # print("User Exists")
-            # from django.contrib.auth import login
-            # login(request, user_exists)
+            user_exists.email_verified = True
+            user_exists.save()
+            login(request, user_exists)
+            messages.success(request, message="Email verified successfully")
             return redirect("tenant:home")
     except TenantUser.DoesNotExist:
         return HttpResponse("Tenant does not exist", status=404)
