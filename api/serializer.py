@@ -1,15 +1,16 @@
 from rest_framework import serializers
 from tenant.models import TenantUser
 
-class TenantSerializer(serializers.Serializer):
-    clinic_name = serializers.CharField(required=True, label="HealthCare Name", max_length = 255)
-    clinic_email = serializers.EmailField(required=True, label="Email Address")
+
+class TenantSignUpSerializer(serializers.Serializer):
+    clinic_name = serializers.CharField(max_length = 255)
+    clinic_email = serializers.EmailField()
     website = serializers.CharField(required=False, allow_null=True, allow_blank=True, max_length=255)
-    country = serializers.CharField(required=True, max_length=255)
-    address = serializers.CharField(required=True, max_length=255)
-    phonenumber = serializers.RegexField(required=True, max_length=16, regex=r'^\+\d{9,15}$')
-    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
-    re_enter_password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    country = serializers.CharField(max_length=255)
+    address = serializers.CharField(max_length=255)
+    phonenumber = serializers.RegexField(max_length=16, regex=r'^\+\d{9,15}$')
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    re_enter_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
 
     def validate(self, data):
         # Validates each field that are required to be unique
@@ -32,3 +33,24 @@ class TenantSerializer(serializers.Serializer):
         TenantUser.objects.create_user(clinic_name=data['clinic_name'], clinic_email=data['clinic_email'],  country=data['country'], phonenumber=data['phonenumber'], address=data['address'], subscription='Basic', website=data['website'] , password=data['password'])
         data.pop('password')
         return data
+    
+class TenantLoginSerializer(serializers.Serializer):
+    clinic_email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+
+    def validate(self, data):
+        clinic_email = data['clinic_email']
+        tenant = TenantUser.objects.filter(clinic_email=clinic_email)
+        if tenant:
+            return data
+        raise serializers.ValidationError({'Error': 'Email or password is incorrect!'})
+    
+    # def update(self, instance, validated_data):
+    #     instance.clinic_name = validated_data.get('clinic_name', instance.clinic_name)
+    #     instance.clinic_email = validated_data.get('clinic_email', instance.clinic_email)
+    #     instance.country = validated_data.get('country', instance.country)
+    #     instance.phonenumber = validated_data.get('phonenumber', instance.phonenumber)
+    #     instance.subscription = validated_data.get('subscription', instance.subscription)
+    #     instance.address = validated_data.get('address', instance.address)
+    #     instance.website = validated_data.get('website', instance.website)
+    #     return instance
