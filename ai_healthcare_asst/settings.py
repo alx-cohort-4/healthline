@@ -140,6 +140,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
+# Allow credentials if needed (e.g., cookies, session auth)
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_URLS_REGEX = r"^/api/.*$"
+
 # CORS_ALLOWED_ORIGIN_REGEXES = [
 #     r"^https://\w+\.example\.com$",
 # ]
