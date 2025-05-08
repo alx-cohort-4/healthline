@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("TOP_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -41,6 +41,8 @@ MIDDLEWARE = [
     'tenant.middleware.MultiTenantMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    
 ]
 
 REST_FRAMEWORK = {
@@ -76,16 +78,18 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ai_healthcare_asst.wsgi.application'
 
 # Database
+# if DEBUG:
 DATABASES = {
     'default': {
         'ENGINE': os.getenv("ENGINE"),
-        'NAME': os.getenv("DB_NAME"),     
-        'USER': os.getenv("DB_USER"),          
-        'PASSWORD': os.getenv("DB_PASSWORD"),      
-        'HOST': os.getenv("DB_HOST"),              
-        'PORT': os.getenv("DB_PORT"),                   
-    }
+    'NAME': os.getenv("DB_NAME"),     
+    'USER': os.getenv("DB_USER"),          
+    'PASSWORD': os.getenv("DB_PASSWORD"),      
+    'HOST': os.getenv("DB_HOST"),              
+    'PORT': os.getenv("DB_PORT"),                   
 }
+}
+
 
 # Database routers
 # DATABASE_ROUTERS = (
@@ -120,18 +124,27 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "tenant.TenantUser"
 
 # Email Settings
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
-EMAIL_HOST = os.getenv("EMAIL_HOST")
-EMAIL_PORT = os.getenv("EMAIL_PORT")
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
+if DEBUG:
+    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+    EMAIL_HOST = os.getenv("EMAIL_HOST")
+    EMAIL_PORT = os.getenv("EMAIL_PORT")
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
+else:
+    EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
+    EMAIL_HOST = os.getenv("P_EMAIL_HOST")
+    EMAIL_PORT = os.getenv("P_EMAIL_PORT")
+    EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
+    EMAIL_USE_SSL = os.getenv("P_EMAIL_USE_SSL")
 
 LOGIN_URL = "/tenant/login/"
 LOGOUT_REDIRECT_URL = "/tenant/login/"
@@ -149,6 +162,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
     "http://127.0.0.1:9000",
 ]
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 # CORS_ALLOWED_ORIGIN_REGEXES = [
 #     r"^https://\w+\.example\.com$",
