@@ -12,7 +12,7 @@ def create_demo_tenant_and_patient(apps, schema_editor):
         country="Nigeria",
         phonenumber="+2348012345678",
         subscription="Basic",
-        location="Ikeja, Lagos",
+        address="Ikeja, Lagos",
         # profile_photo = "ndufkjfijfjfoijeeoni"
         password="porkDemoPass12345678",  
         email_verified = False,
