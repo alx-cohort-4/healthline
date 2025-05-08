@@ -8,11 +8,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("TOP_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 # Application definition
 
@@ -84,11 +82,6 @@ DATABASES = {
     }
 }
 
-# Database routers
-# DATABASE_ROUTERS = (
-#     'django_tenants.routers.TenantSyncRouter',
-# )
-
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -133,31 +126,4 @@ EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
 LOGIN_URL = "/tenant/login/"
 LOGOUT_REDIRECT_URL = "/tenant/login/"
 
-CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "https://sub.example.com",
-    "http://localhost:8080",
-    "http://127.0.0.1:9000",
-]
 
-# CORS_ALLOWED_ORIGIN_REGEXES = [
-#     r"^https://\w+\.example\.com$",
-# ]
-
-# CORS_ALLOW_METHODS = (
-#     "DELETE",
-#     "GET",
-#     "OPTIONS",
-#     "PATCH",
-#     "POST",
-#     "PUT",
-# )
-
-# CORS_ALLOW_HEADERS = (
-#     "accept",
-#     "authorization",
-#     "content-type",
-#     "user-agent",
-#     "x-csrftoken",
-#     "x-requested-with",
-# )
