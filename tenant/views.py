@@ -12,8 +12,6 @@ from django.http import HttpResponse, Http404
 from datetime import date
 import os, jwt
 from .models import TenantUser, Patient
-# from .token import send_email
-from .tasks import send_email
 from . import forms
 
 class HomeView(LoginRequiredMixin, generic.ListView, FormView):
@@ -40,17 +38,6 @@ class HomeView(LoginRequiredMixin, generic.ListView, FormView):
         except TenantUser.DoesNotExist:
             raise Http404("Tenant does not exist")
         return Patient.objects.filter(tenant_user=tenant)
-    
-def testing(request):
-    email = request.user.clinic_email
-    username = request.user.clinic_name
-    email_verified = request.user.email_verified
-    if email_verified == False:
-        send_email.delay(email=email, user=username)
-        return render(request, "tenant/email_message.html", {'email': email, 'name': username})
-    else:
-        messages.success(request, message="Email verified successfully")
-        return redirect("tenant:home")
 
 class SignupPage(FormView):
     template_name = "tenant/sign_up.html"
@@ -63,9 +50,9 @@ class SignupPage(FormView):
         messages.success(self.request, f"Successfully logged in as {user.clinic_name}")
         
         # Send verification email
-        email = user.clinic_email
-        username = user.clinic_name
-        send_email.delay(email=email, user=username)
+        # email = user.clinic_email
+        # username = user.clinic_name
+        # # send_email.delay(email=email, user=username)
         return render(self.request, "tenant/email_message.html", {'email': email, 'name': username})
     # def post(self, request, *args, **kwargs):
     #     form = self.get_form(self.form_class)
@@ -97,7 +84,7 @@ class LoginPage(FormView):
                 return redirect(reverse_lazy(self.success_url))
             else:
                 # Send verification email regardless of whether user exists or not
-                send_email.delay(email=email, user=email.split('@')[0])
+                # send_email.delay(email=email, user=email.split('@')[0])
                 messages.info(request, message="If an account exists with this email, a verification link has been sent.")
                 return render(request, "tenant/email_message.html", {'email': email, 'name': email.split('@')[0]})
         messages.error(request, message="Email or password is incorrect")
@@ -127,32 +114,7 @@ class PatientFormView(LoginRequiredMixin, FormView):
                 return redirect(reverse_lazy(self.success_url))
         return super().post(request, *args, **kwargs)
     
-def VerifyEmailComplete(request):
-    token = request.GET.get("token")
-    with open('public.pem', 'r') as pub_file:
-        public_key = pub_file.read()
-    try:
-        payload = jwt.decode(token, public_key, os.getenv('ALGO'))
-        user = payload.get("sub")
-    except jwt.ExpiredSignatureError:
-        return HttpResponse("Token has expired", status=400)
-    except jwt.InvalidTokenError:
-        return HttpResponse("Invalid token", status=400)
-    
-    try:
-        user_exists = TenantUser.objects.get(clinic_email=user)
-        if user_exists:
-            # print("User Exists")
-            user_exists.email_verified = True
-            user_exists.save()
-            login(request, user_exists)
-            messages.success(request, message="Email verified successfully")
-            return redirect("tenant:home")
-    except TenantUser.DoesNotExist:
-        return HttpResponse("Tenant does not exist", status=404)
-    # res =verify_email.delay(token)
-    # try:
-    # return HttpResponse(res)
+
     
 @login_required
 def logout_user(request):
