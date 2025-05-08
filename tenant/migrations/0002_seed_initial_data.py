@@ -1,41 +1,60 @@
 from django.db import migrations
+from django.contrib.auth.hashers import make_password
 
-# ✅ Directly import models
-from tenant.models import TenantUser, Patient
+def create_initial_data(apps, schema_editor):
+    """
+    Create initial data for the application.
+    Using apps.get_model() to get the historical version of models.
+    """
+    # Get the historical version of the models
+    TenantUser = apps.get_model('tenant', 'TenantUser')
+    Patient = apps.get_model('tenant', 'Patient')
 
-def create_demo_tenant_and_patient(apps, schema_editor):
-    # Create a demo clinic/tenant
-    tenant = TenantUser.objects.create(
+    # Create demo clinic/tenant
+    demo_clinic = TenantUser.objects.create(
         clinic_name="Demo Clinic",
         clinic_email="demo@clinic.com",
-        website="www.example@gmail.com",
+        website="www.example.com",
         country="Nigeria",
         phonenumber="+2348012345678",
         subscription="Basic",
         location="Ikeja, Lagos",
-        # profile_photo = "ndufkjfijfjfoijeeoni"
-        password="porkDemoPass12345678",  
-        email_verified = False,
+        password=make_password("demo123456"),  # Properly hash the password
         is_active=True,
+        email_verified=True,
         is_staff=False,
     )
 
-    # Create a demo patient under the tenant
+    # Create demo patient
     Patient.objects.create(
-        tenant_user=tenant,  # ForeignKey to Tenant
+        tenant_user=demo_clinic,
         first_name="John",
         last_name="Doe",
-        email="test@patient.com",
+        email="john.doe@example.com",
         phonenumber="+2348011111111",
         date_of_birth="2000-01-01",
     )
 
-class Migration(migrations.Migration):
+def reverse_initial_data(apps, schema_editor):
+    """
+    Reverse the initial data creation.
+    This is called when the migration is reversed.
+    """
+    TenantUser = apps.get_model('tenant', 'TenantUser')
+    Patient = apps.get_model('tenant', 'Patient')
+    
+    # Delete in reverse order to handle foreign key constraints
+    Patient.objects.filter(email="john.doe@example.com").delete()
+    TenantUser.objects.filter(clinic_email="demo@clinic.com").delete()
 
+class Migration(migrations.Migration):
     dependencies = [
         ('tenant', '0001_initial'),
     ]
 
     operations = [
-        migrations.RunPython(create_demo_tenant_and_patient),
-    ]
+        migrations.RunPython(
+            create_initial_data,
+            reverse_initial_data,  # Provide reverse function for rollback
+        ),
+    ] 
