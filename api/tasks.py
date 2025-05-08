@@ -10,7 +10,6 @@ from tenant.models import TenantUser
 from dotenv import load_dotenv
 load_dotenv()
 
-@shared_task
 def expiration_time(minutes=0):
     now = datetime.now(timezone.utc) + timedelta(minutes=minutes)
     return int(now.timestamp())
