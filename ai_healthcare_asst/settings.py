@@ -8,11 +8,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("TOP_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 # Application definition
 
@@ -44,14 +42,12 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ],
 
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.IsAuthenticated',
+       
     ]
 }
 ROOT_URLCONF = 'ai_healthcare_asst.urls'
@@ -85,11 +81,6 @@ DATABASES = {
         'PORT': os.getenv("DB_PORT"),                   
     }
 }
-
-# Database routers
-# DATABASE_ROUTERS = (
-#     'django_tenants.routers.TenantSyncRouter',
-# )
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -135,6 +126,7 @@ EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
 LOGIN_URL = "/tenant/login/"
 LOGOUT_REDIRECT_URL = "/tenant/login/"
 
+# setup-cors branch
 CORS_ALLOWED_ORIGINS = [
     "https://healthline-nu.vercel.app",
     "http://127.0.0.1:3000",
@@ -145,11 +137,15 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_URLS_REGEX = r"^/api/.*$"
 
-
 # Prevent the site from being embedded in frames (mitigates clickjacking)
 X_FRAME_OPTIONS = "DENY"
 
 SECURE_SSL_REDIRECT = not DEBUG  
+
+# Prevent the site from being embedded in frames (mitigates clickjacking)
+X_FRAME_OPTIONS = "DENY"
+
+SECURE_SSL_REDIRECT = not DEBUG
 
 # Adds Strict-Transport-Security header (enforces HTTPS in browsers)
 SECURE_HSTS_SECONDS = 31536000  # 1 year
@@ -169,25 +165,3 @@ CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = True
 
 SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
-
-# CORS_ALLOWED_ORIGIN_REGEXES = [
-#     r"^https://\w+\.example\.com$",
-# ]
-
-# CORS_ALLOW_METHODS = (
-#     "DELETE",
-#     "GET",
-#     "OPTIONS",
-#     "PATCH",
-#     "POST",
-#     "PUT",
-# )
-
-# CORS_ALLOW_HEADERS = (
-#     "accept",
-#     "authorization",
-#     "content-type",
-#     "user-agent",
-#     "x-csrftoken",
-#     "x-requested-with",
-# )

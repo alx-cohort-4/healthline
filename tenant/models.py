@@ -8,28 +8,28 @@ from datetime import date
 import uuid
 
 class TenantUserManager(TenantManagerMixin, BaseUserManager):
-    def create_user(self, clinic_name, clinic_email, website, country, phonenumber, subscription, location, password=None, **extra_fields):
+    def create_user(self, clinic_name, clinic_email, website, country, phonenumber, subscription, address, password=None, **extra_fields):
         # Check if required fields are supplied
-        if not all([clinic_name, clinic_email, website, country, phonenumber, location, password]):
+        if not clinic_email and not clinic_name and not country and not phonenumber and not address and not password:
             raise ValidationError("All fields are required")
         
         clinic_email = self.normalize_email(clinic_email)
         # Checks if tenant email already exist
         if self.model.objects.filter(clinic_email=clinic_email).exists():
             raise ValidationError("A Tenant with this email already exist!")
-        user = self.model(clinic_name=clinic_name, clinic_email=clinic_email, website=website, country=country, phonenumber=phonenumber, subscription=subscription, location=location, **extra_fields)
+        user = self.model(clinic_name=clinic_name, clinic_email=clinic_email, website=website, country=country, phonenumber=phonenumber, subscription=subscription, address=address, **extra_fields)
         # Hash the password if not none
         user.set_password(password)
         # Save to database
         user.save(using=self._db)
         return user
     
-    def create_superuser(self, clinic_name, clinic_email, website, country, phonenumber, subscription, location, password=None, **extra_fields):
+    def create_superuser(self, clinic_name, clinic_email, website, country, phonenumber, subscription, address, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         # Set role for developer to seperate from tenant
         extra_fields.setdefault("role", "developer") # for developers
-        return self.create_user(clinic_name=clinic_name, clinic_email=clinic_email, website=website, country=country, phonenumber=phonenumber, subscription=subscription, location=location, password=password, **extra_fields)
+        return self.create_user(clinic_name=clinic_name, clinic_email=clinic_email, website=website, country=country, phonenumber=phonenumber, subscription=subscription, address=address, password=password, **extra_fields)
         
 class TenantUser(TenantModelMixin, AbstractUser):
     # Choices to save both tenant and developer sharing same model
@@ -48,7 +48,7 @@ class TenantUser(TenantModelMixin, AbstractUser):
     website = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=False, blank=False)
     phonenumber = models.CharField(max_length=16, null=False, blank=False, unique=True, validators=[RegexValidator(regex=r'^\+\d{9,15}$')])
-    location  = models.TextField(null=False, blank=False)
+    address  = models.TextField(null=False, blank=False)
     subscription = models.CharField(max_length=50, null=False, blank=False, default="Basic")
     email_verified = models.BooleanField(default=False)
     role = models.CharField(max_length=9, choices=ROLES_CHOICES, default="tenant")
@@ -68,7 +68,7 @@ class TenantUser(TenantModelMixin, AbstractUser):
         if self.website:
             self.website = self.website.strip().lower()
         self.country = self.country.strip().capitalize()
-        self.location = self.location.strip().capitalize()
+        self.address = self.address.strip().capitalize()
         self.subscription = self.subscription.strip().capitalize()
         super().save(*args, **kwargs)
 
