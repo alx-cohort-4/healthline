@@ -10,3 +10,4 @@ cryptography==44.0.3
 # pip install cryptography
 # pip install pillow
 # pip install django-cors-headers
+# pip install dj-rest-auth

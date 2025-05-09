@@ -24,7 +24,8 @@ INSTALLED_APPS = [
     'tenant',
     'api',
     'rest_framework.authtoken',
-    "corsheaders",
+    'corsheaders',
+    'dj_rest_auth',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,13 @@ REST_FRAMEWORK = {
        
     ]
 }
+
+REST_AUTH = {
+    'PASSWORD_RESET_SERIALIZER': 'api.serializer.TenantPasswordResetSerializer',
+    'PASSWORD_RESET_CONFIRM_SERIALIZER': 'dj_rest_auth.serializers.PasswordResetConfirmSerializer',
+    'PASSWORD_CHANGE_SERIALIZER': 'dj_rest_auth.serializers.PasswordChangeSerializer',
+}
+
 ROOT_URLCONF = 'ai_healthcare_asst.urls'
 
 TEMPLATES = [
@@ -122,6 +130,9 @@ EMAIL_PORT = os.getenv("EMAIL_PORT")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
+
+# For testing email in development
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 LOGIN_URL = "/tenant/login/"
 LOGOUT_REDIRECT_URL = "/tenant/login/"

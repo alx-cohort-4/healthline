@@ -1,11 +1,12 @@
 from rest_framework import serializers
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.tokens import default_token_generator
 from tenant.models import TenantUser
-
 
 class TenantSignUpSerializer(serializers.Serializer):
     clinic_name = serializers.CharField(max_length = 255)
     clinic_email = serializers.EmailField()
-    website = serializers.CharField(required=False, allow_null=True, allow_blank=True, max_length=255)
+    website = serializers.CharField(required=True, allow_null=True, allow_blank=True, max_length=255)
     country = serializers.CharField(max_length=255)
     address = serializers.CharField(max_length=255)
     phonenumber = serializers.RegexField(max_length=16, regex=r'^\+\d{9,15}$')
@@ -30,9 +31,13 @@ class TenantSignUpSerializer(serializers.Serializer):
     def create(self, validated_data):
         validated_data.pop('re_enter_password')
         data = validated_data
-        TenantUser.objects.create_user(clinic_name=data['clinic_name'], clinic_email=data['clinic_email'],  country=data['country'], phonenumber=data['phonenumber'], address=data['address'], subscription='Basic', website=data['website'] , password=data['password'])
-        data.pop('password')
-        return data
+        print("In here")
+        try:
+            TenantUser.objects.create_user(clinic_name=data['clinic_name'], clinic_email=data['clinic_email'],  country=data['country'], phonenumber=data['phonenumber'], address=data['address'], subscription='Basic', website=data['website'] , password=data['password'])
+            data.pop('password')
+            return data
+        except Exception:
+            raise serializers.ValidationError({"Error": "Account already exist with either clinic_email, clinic_name, phonenumber, or website"})
     
 class TenantLoginSerializer(serializers.Serializer):
     clinic_email = serializers.EmailField()
@@ -54,3 +59,26 @@ class TenantLoginSerializer(serializers.Serializer):
     #     instance.address = validated_data.get('address', instance.address)
     #     instance.website = validated_data.get('website', instance.website)
     #     return instance
+
+class TenantPasswordResetSerializer(serializers.Serializer):
+    clinic_email = serializers.EmailField()
+
+    def validate_clinic_email(self, value):
+        if not TenantUser.objects.filter(clinic_email=value).exists():
+            return {'error': 'Email does not exist'}
+        return value
+    
+class TenantPasswordConfirmResetSerializer(serializers.Serializer):
+    password = serializers.CharField(max_length=255)
+    re_enter_password = serializers.CharField(max_length=255)
+
+    def validate(self, data):
+        if data['password'] != data['re_enter_password']:
+            raise serializers.ValidationError({'error': "password do not match!"})
+        data.pop('re_enter_password')
+        print(data, "coming from serializer's class")
+        return data
+
+    
+        
+        
