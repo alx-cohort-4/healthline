@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useCountries } from "../hooks/useCountry";
+import { LogoIcon } from "../globals/Icons";
 
 const signupSchema = z
   .object({
@@ -22,31 +24,10 @@ const signupSchema = z
     path: ["confirmPassword"],
   });
 
-const countryOptions = [
-  { value: "Ghana", label: "Ghana" },
-  { value: "Nigeria", label: "Nigeria" },
-  { value: "Kenya", label: "Kenya" },
-  { value: "South Africa", label: "South Africa" },
-  { value: "Uganda", label: "Uganda" },
-  { value: "Tanzania", label: "Tanzania" },
-  { value: "Zimbabwe", label: "Zimbabwe" },
-  { value: "Rwanda", label: "Rwanda" },
-  { value: "Zambia", label: "Zambia" },
-  { value: "Cameroon", label: "Cameroon" },
-  { value: "Senegal", label: "Senegal" },
-  { value: "United States", label: "United States" },
-  { value: "Canada", label: "Canada" },
-  { value: "United Kingdom", label: "United Kingdom" },
-  { value: "Australia", label: "Australia" },
-  { value: "Germany", label: "Germany" },
-  { value: "France", label: "France" },
-  { value: "Japan", label: "Japan" },
-  { value: "Brazil", label: "Brazil" },
-  { value: "India", label: "India" },
-];
-
 const Signup = () => {
   const navigate = useNavigate();
+  const { countries } = useCountries();
+  console.log("🚀 ~ Signup ~ countries:", countries);
 
   const {
     register,
@@ -74,43 +55,55 @@ const Signup = () => {
   return (
     <div className="flex w-full bg-white">
       <form onSubmit={handleSubmit(onSubmit)} className="rounded-lg w-full">
+        <div className="flex items-center text-primary justify-center">
+          <div className="flex items-center gap-2 mb-4">
+            <LogoIcon className="w-10 h-10 " />
+            <div>
+              <span className="font-bold block text-center text-lg">Clyna</span>
+              <small className=" text-[.4rem] block leading-none">
+                Smartcare Automated
+              </small>
+            </div>
+          </div>
+        </div>
         <h2 className="text-3xl font-bold text-center mb-2 text-gray-800">
           Sign Up
         </h2>
         <p className="text-sm text-center text-gray-600 mb-6">
-          Fill the form to get registered
+          Enter the Details of your Healthcare Facility below to create an
+          account
         </p>
 
         <Input
-          label="Clinic Name"
-          placeholder="Enter Clinic Name"
+          label="Healthcare Falculty  Name"
+          placeholder="Enter Healthcare Falculty  Name"
           required
           error={errors.clinicName?.message}
           {...register("clinicName")}
         />
 
         <Input
-          label="Clinic Email Address"
+          label="Healthcare Falculty Email Address"
           type="email"
-          placeholder="Enter Clinic Email"
+          placeholder="Enter Healthcare Falculty Email"
           required
           error={errors.email?.message}
           {...register("email")}
         />
 
         <Input
-          label="Clinic Phone Number"
+          label="Healthcare Falculty Phone Number"
           type="tel"
-          placeholder="Enter Clinic Phone Number"
+          placeholder="Enter Healthcare Falculty Phone Number"
           required
           error={errors.phone?.message}
           {...register("phone")}
         />
 
         <Input
-          label="Clinic Website"
+          label="Healthcare Falculty Website"
           type="url"
-          placeholder="Enter Clinic Website"
+          placeholder="Enter Healthcare Falculty Website"
           error={errors.website?.message}
           {...register("website")}
         />
@@ -123,7 +116,7 @@ const Signup = () => {
               label="Country"
               required
               placeholder="Select Country"
-              options={countryOptions}
+              options={countries}
               error={errors.country?.message}
               value={field.value}
               onValueChange={field.onChange}
