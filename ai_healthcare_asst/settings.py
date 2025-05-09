@@ -140,7 +140,13 @@ CORS_URLS_REGEX = r"^/api/.*$"
 # Prevent the site from being embedded in frames (mitigates clickjacking)
 X_FRAME_OPTIONS = "DENY"
 
+SECURE_SSL_REDIRECT = not DEBUG  
+
+# Prevent the site from being embedded in frames (mitigates clickjacking)
+X_FRAME_OPTIONS = "DENY"
+
 SECURE_SSL_REDIRECT = not DEBUG
+
 # Adds Strict-Transport-Security header (enforces HTTPS in browsers)
 SECURE_HSTS_SECONDS = 31536000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -159,4 +165,3 @@ CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = True
 
 SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
-
