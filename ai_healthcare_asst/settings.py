@@ -126,4 +126,37 @@ EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
 LOGIN_URL = "/tenant/login/"
 LOGOUT_REDIRECT_URL = "/tenant/login/"
 
+# setup-cors branch
+CORS_ALLOWED_ORIGINS = [
+    "https://healthline-nu.vercel.app",
+    "http://127.0.0.1:3000",
+]
+
+# Allow credentials if needed (e.g., cookies, session auth)
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_URLS_REGEX = r"^/api/.*$"
+
+# Prevent the site from being embedded in frames (mitigates clickjacking)
+X_FRAME_OPTIONS = "DENY"
+
+SECURE_SSL_REDIRECT = not DEBUG
+# Adds Strict-Transport-Security header (enforces HTTPS in browsers)
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Prevents browser from guessing content types
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Enables XSS protection in some older browsers
+SECURE_BROWSER_XSS_FILTER = True
+
+# Cookie security
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+CSRF_COOKIE_HTTPONLY = True
+
+SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
 
