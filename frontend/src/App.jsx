@@ -5,14 +5,14 @@ import SignupPage from "./pages/SignupPage";
 import EmailConfirmation from "./components/auth/EmailConfirmation";
 import AuthLayout from "./components/Layout/AuthLayout";
 import LandingPage from "./pages/LandingPage";
-import HardworkingSection from "./components/landing-page/HardworkingSection"
+import HardworkingSection from "./components/landing-page/HardworkingSection";
 const App = () => {
   return (
     <div className="min-h-screen">
       <Routes>
-        <Route path="/home" element={<LandingPage />} />
+        <Route index element={<LandingPage />} />
         <Route path="/" element={<AuthLayout />}>
-          <Route index element={<Navigate to="/" replace />} />
+          <Route index element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
         </Route>
