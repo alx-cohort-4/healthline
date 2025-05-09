@@ -11,8 +11,7 @@ SECRET_KEY = os.getenv("TOP_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 # Application definition
 
@@ -47,14 +46,12 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ],
 
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.IsAuthenticated',
+       
     ]
 }
 ROOT_URLCONF = 'ai_healthcare_asst.urls'
@@ -90,11 +87,6 @@ DATABASES = {
 }
 }
 
-
-# Database routers
-# DATABASE_ROUTERS = (
-#     'django_tenants.routers.TenantSyncRouter',
-# )
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -156,33 +148,37 @@ SIMPLE_JWT = {
         'VERIFYING_KEY': open('public.pem', 'r').read(),
         'ALGORITHM': os.getenv('ALGO')
     }
+# setup-cors branch
 CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "https://sub.example.com",
-    "http://localhost:8080",
-    "http://127.0.0.1:9000",
+    "https://healthline-nu.vercel.app",
+    "http://127.0.0.1:3000",
 ]
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+# Allow credentials if needed (e.g., cookies, session auth)
+CORS_ALLOW_CREDENTIALS = True
 
-# CORS_ALLOWED_ORIGIN_REGEXES = [
-#     r"^https://\w+\.example\.com$",
-# ]
+CORS_URLS_REGEX = r"^/api/.*$"
 
-# CORS_ALLOW_METHODS = (
-#     "DELETE",
-#     "GET",
-#     "OPTIONS",
-#     "PATCH",
-#     "POST",
-#     "PUT",
-# )
+# Prevent the site from being embedded in frames (mitigates clickjacking)
+X_FRAME_OPTIONS = "DENY"
 
-# CORS_ALLOW_HEADERS = (
-#     "accept",
-#     "authorization",
-#     "content-type",
-#     "user-agent",
-#     "x-csrftoken",
-#     "x-requested-with",
-# )
+SECURE_SSL_REDIRECT = not DEBUG
+# Adds Strict-Transport-Security header (enforces HTTPS in browsers)
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Prevents browser from guessing content types
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Enables XSS protection in some older browsers
+SECURE_BROWSER_XSS_FILTER = True
+
+# Cookie security
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+CSRF_COOKIE_HTTPONLY = True
+
+SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
+
