@@ -4,11 +4,11 @@ import HardworkingSection from "../components/landing-page/HardworkingSection";
 import Testimonials from "../components/landing-page/TestimonialSection";
 
 const LandingPage = () => (
-  <div className=" flex px-4 md:px-12 lg:px-25 flex-col min-h-dvh pb-20   ">
+  <div className=" flex flex-col min-h-dvh    ">
     <Nav />
     <HeroSection />
+    <Testimonials />
     <HardworkingSection />
-    <Testimonials/>
   </div>
 );
 
