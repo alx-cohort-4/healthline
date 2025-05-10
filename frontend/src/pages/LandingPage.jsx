@@ -1,11 +1,14 @@
 import Nav from "../components/shared/Nav";
 import HeroSection from "../components/landing-page/HeroSection";
 import HardworkingSection from "../components/landing-page/HardworkingSection";
+import Testimonials from "../components/landing-page/TestimonialSection";
+
 const LandingPage = () => (
   <div className=" flex px-4 md:px-12 lg:px-25 flex-col min-h-dvh pb-20   ">
     <Nav />
     <HeroSection />
     <HardworkingSection />
+    <Testimonials/>
   </div>
 );
 
