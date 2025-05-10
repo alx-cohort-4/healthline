@@ -18,13 +18,13 @@ class EmailVerificationTests(TestCase):
         self.client = APIClient()
         # Create a test user
         self.test_user = TenantUser.objects.create(
-            clinic_email="test@example.com",
+            clinic_email="test1@example.com",
             clinic_name="Test Clinic",
             website="www.example.com",
             country="Nigeria",
-            phonenumber="+2348012345678",
+            phonenumber="+23480345678",
             subscription="Basic",
-            location="Ikeja, Lagos",
+            address="Ikeja, Lagos",
             password="testpass123",
             is_active=True,
             is_staff=False,
@@ -63,7 +63,7 @@ class EmailVerificationTests(TestCase):
     @patch('jwt.decode')
     def test_verify_email_complete_success(self, mock_jwt_decode):
         """Test successful email verification completion"""
-        mock_jwt_decode.return_value = {"sub": "test@example.com"}
+        mock_jwt_decode.return_value = {"sub": "test1@example.com"}
         
         url = reverse('verify_email_complete')
         response = self.client.get(f"{url}?token={self.valid_token}")

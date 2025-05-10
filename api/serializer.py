@@ -43,7 +43,6 @@ class TenantSignUpSerializer(serializers.Serializer):
     
         validated_data.pop('re_enter_password')
         data = validated_data
-        print("In here")
         try:
             TenantUser.objects.create_user(clinic_name=data['clinic_name'], clinic_email=data['clinic_email'],  country=data['country'], phonenumber=data['phonenumber'], address=data['address'], subscription='Basic', website=data['website'] , password=data['password'])
             data.pop('password')

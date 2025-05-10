@@ -2,7 +2,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+# load_dotenv()
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(os.path.join(BASE_DIR, '.env'), override=True)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -83,28 +85,32 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ai_healthcare_asst.wsgi.application'
 
 # Database
-# if DEBUG:
-DATABASES = {
-    'default': {
-    'ENGINE': os.getenv("ENGINE"),
-    'NAME': os.getenv("DB_NAME"),     
-    'USER': os.getenv("DB_USER"),          
-    'PASSWORD': os.getenv("DB_PASSWORD"),      
-    'HOST': os.getenv("DB_HOST"),              
-    'PORT': os.getenv("DB_PORT"),                   
-}
-}
-# else:
-#     DATABASES = {
-#         'default':{
-#             'ENGINE': os.getenv("ENGINE"),
-#             'NAME': os.getenv("P_DB_NAME"),
-#             'USER': os.getenv("P_DB_USER"),
-#             'PASSWORD': os.getenv("P_DB_PASSWORD"),
-#             'HOST': os.getenv("P_DB_HOST"),
-#             'PORT': os.getenv("P_DB_PORT"),
-#         }
-#     }
+if DEBUG:
+    DATABASES = {
+        'default': {
+        'ENGINE': os.getenv("ENGINE"),
+        'NAME': os.getenv("DB_NAME"),     
+        'USER': os.getenv("DB_USER"),          
+        'PASSWORD': os.getenv("DB_PASSWORD"),      
+        'HOST': os.getenv("DB_HOST"),              
+        'PORT': os.getenv("DB_PORT"),                   
+    }
+    }
+else:
+    DATABASES = {
+        'default':{
+            'ENGINE': os.getenv("P_ENGINE"),
+            'NAME': os.getenv("P_DB_NAME"),
+            'USER': os.getenv("P_DB_USER"),
+            'PASSWORD': os.getenv("P_DB_PASSWORD"), 
+            'HOST': os.getenv("P_DB_HOST"),
+            'PORT': os.getenv("P_DB_PORT"),
+            'OPTIONS': {
+                'sslmode': 'require',
+                'sslrootcert': os.path.join(BASE_DIR, 'prod-ca-2021.crt'),
+            },
+        }
+    }
 
 
 # Password validation
@@ -142,20 +148,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "tenant.TenantUser"
 
 # Email Settings
-# if DEBUG:
-# EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
-# EMAIL_HOST = os.getenv("EMAIL_HOST")
-# EMAIL_PORT = os.getenv("EMAIL_PORT")
-# EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-# EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-# EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
-# else:
-EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
-EMAIL_HOST = os.getenv("P_EMAIL_HOST")
-EMAIL_PORT = os.getenv("P_EMAIL_PORT")
-EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.getenv("P_EMAIL_USE_TLS")
+if DEBUG:
+    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+    EMAIL_HOST = os.getenv("EMAIL_HOST")
+    EMAIL_PORT = os.getenv("EMAIL_PORT")
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
+else:
+    EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
+    EMAIL_HOST = os.getenv("P_EMAIL_HOST")
+    EMAIL_PORT = os.getenv("P_EMAIL_PORT")
+    EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
+    EMAIL_USE_TLS = os.getenv("P_EMAIL_USE_TLS")
 
 # For testing email in development
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -184,11 +190,12 @@ CORS_URLS_REGEX = r"^/api/.*$"
 # Prevent the site from being embedded in frames (mitigates clickjacking)
 X_FRAME_OPTIONS = "DENY"
 
-SECURE_SSL_REDIRECT = not DEBUG
+# Only enable SSL redirect in production
+SECURE_SSL_REDIRECT = False if DEBUG else True
 # Adds Strict-Transport-Security header (enforces HTTPS in browsers)
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 year in production, 0 in development
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
 
 # Prevents browser from guessing content types
 SECURE_CONTENT_TYPE_NOSNIFF = True
