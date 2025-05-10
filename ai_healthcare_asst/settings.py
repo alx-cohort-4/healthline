@@ -26,7 +26,8 @@ INSTALLED_APPS = [
     'api',
     'rest_framework',
     'rest_framework.authtoken',
-    "corsheaders",
+    'corsheaders',
+    'dj_rest_auth',
 ]
 
 MIDDLEWARE = [
@@ -54,6 +55,13 @@ REST_FRAMEWORK = {
        
     ]
 }
+
+REST_AUTH = {
+    'PASSWORD_RESET_SERIALIZER': 'api.serializer.TenantPasswordResetSerializer',
+    'PASSWORD_RESET_CONFIRM_SERIALIZER': 'dj_rest_auth.serializers.PasswordResetConfirmSerializer',
+    'PASSWORD_CHANGE_SERIALIZER': 'dj_rest_auth.serializers.PasswordChangeSerializer',
+}
+
 ROOT_URLCONF = 'ai_healthcare_asst.urls'
 
 TEMPLATES = [
@@ -78,7 +86,7 @@ WSGI_APPLICATION = 'ai_healthcare_asst.wsgi.application'
 # if DEBUG:
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv("ENGINE"),
+    'ENGINE': os.getenv("ENGINE"),
     'NAME': os.getenv("DB_NAME"),     
     'USER': os.getenv("DB_USER"),          
     'PASSWORD': os.getenv("DB_PASSWORD"),      
@@ -86,6 +94,17 @@ DATABASES = {
     'PORT': os.getenv("DB_PORT"),                   
 }
 }
+# else:
+#     DATABASES = {
+#         'default':{
+#             'ENGINE': os.getenv("ENGINE"),
+#             'NAME': os.getenv("P_DB_NAME"),
+#             'USER': os.getenv("P_DB_USER"),
+#             'PASSWORD': os.getenv("P_DB_PASSWORD"),
+#             'HOST': os.getenv("P_DB_HOST"),
+#             'PORT': os.getenv("P_DB_PORT"),
+#         }
+#     }
 
 
 # Password validation
@@ -123,20 +142,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "tenant.TenantUser"
 
 # Email Settings
-if DEBUG:
-    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
-    EMAIL_HOST = os.getenv("EMAIL_HOST")
-    EMAIL_PORT = os.getenv("EMAIL_PORT")
-    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
-else:
-    EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
-    EMAIL_HOST = os.getenv("P_EMAIL_HOST")
-    EMAIL_PORT = os.getenv("P_EMAIL_PORT")
-    EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
-    EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
-    EMAIL_USE_SSL = os.getenv("P_EMAIL_USE_SSL")
+# if DEBUG:
+# EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+# EMAIL_HOST = os.getenv("EMAIL_HOST")
+# EMAIL_PORT = os.getenv("EMAIL_PORT")
+# EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+# EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+# EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
+# else:
+EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
+EMAIL_HOST = os.getenv("P_EMAIL_HOST")
+EMAIL_PORT = os.getenv("P_EMAIL_PORT")
+EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = os.getenv("P_EMAIL_USE_TLS")
+
+# For testing email in development
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 LOGIN_URL = "/tenant/login/"
 LOGOUT_REDIRECT_URL = "/tenant/login/"

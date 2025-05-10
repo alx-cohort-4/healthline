@@ -20,8 +20,12 @@ def create_initial_data(apps, schema_editor):
         subscription="Basic",
         location="Ikeja, Lagos",
         password=make_password("demo123456"),  # Properly hash the password
+        # address="Ikeja, Lagos",
+        # profile_photo = "ndufkjfijfjfoijeeoni"
+        # password="porkDemoPass12345678",  
+        email_verified = False,
         is_active=True,
-        email_verified=True,
+        # email_verified=True,
         is_staff=False,
     )
 
