@@ -1,7 +1,7 @@
 import Nav from "../components/shared/Nav";
 import HeroSection from "../components/landing-page/HeroSection";
-import HardworkingSection from "../components/landing-page/HardworkingSection";
 import Testimonials from "../components/landing-page/TestimonialSection";
+import HardworkingSection from "../components/landing-page/HardworkingSection";
 
 const LandingPage = () => (
   <div className=" flex flex-col min-h-dvh    ">
