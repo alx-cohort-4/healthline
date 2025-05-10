@@ -11,7 +11,7 @@ const Header = () => {
   return (
     <header className="flex justify-between items-center py-6   ">
       <span className="text-primary text-3xl font-semibold ">
-        AI HealthLine
+        Clyna
       </span>
       <nav>
         <ul className="flex space-x-8">

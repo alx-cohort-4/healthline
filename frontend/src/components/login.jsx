@@ -73,7 +73,7 @@ const Login = () => {
           </button>
         </div>
 
-        <Button type="submit" className="w-full mb-2 min-h-10 py-4 mt-2">
+        <Button type="submit" className="w-full mb-2 h-[48px] py-4 mt-2">
           Login
         </Button>
 
