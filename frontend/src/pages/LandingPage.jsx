@@ -2,13 +2,25 @@ import Nav from "../components/shared/Nav";
 import HeroSection from "../components/landing-page/HeroSection";
 import Testimonials from "../components/landing-page/TestimonialSection";
 import HardworkingSection from "../components/landing-page/HardworkingSection";
+import FAQSection from "../components/landing-page/FAQSection";
+import Footer from "../components/shared/Footer";
+import AnimateSection from "../components/landing-page/AnimateSection";
+import Testimonials from "../components/landing-page/TestimonialSection";
 
 const LandingPage = () => (
   <div className=" flex flex-col min-h-dvh    ">
     <Nav />
     <HeroSection />
-    <Testimonials />
-    <HardworkingSection />
+    <AnimateSection>
+      <HardworkingSection />
+    </AnimateSection>
+    <AnimateSection>
+      <Testimonials />
+    </AnimateSection>
+    <AnimateSection>
+      <FAQSection />
+    </AnimateSection>
+    <Footer />
   </div>
 );
 

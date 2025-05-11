@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const testimonials = [
   {
-    title: `"40% Drop in No-Shows"`,
+    title: "40% Drop in No-Shows",
     name: "Dr. Sarki Bello",
     role: "Chief Medical Officer, Lifeline Clinic",
     comment:
@@ -11,7 +11,7 @@ const testimonials = [
     image: "https://i.pravatar.cc/150?img=3",
   },
   {
-    title: `"Workflow Made Smoother"`,
+    title: "Workflow Made Smoother",
     name: "Nurse Tunde Akande",
     role: "Lead Nurse, Healing Hands Hospital",
     comment:
@@ -19,7 +19,7 @@ const testimonials = [
     image: "https://i.pravatar.cc/150?img=4",
   },
   {
-    title: `"Always-On Assistant"`,
+    title: "Always-On Assistant",
     name: "Mrs. Ruth Eze",
     role: "Admin Manager, City Health Center",
     comment:
@@ -27,7 +27,7 @@ const testimonials = [
     image: "https://i.pravatar.cc/150?img=5",
   },
   {
-    title: `"Boosted Patient Happiness"`,
+    title: "Boosted Patient Happiness",
     name: "Dr. Chinedu Nwachukwu",
     role: "Medical Director, Unity Hospital",
     comment:
@@ -35,7 +35,7 @@ const testimonials = [
     image: "https://i.pravatar.cc/150?img=6",
   },
   {
-    title: `"Quick Staff Adoption"`,
+    title: "Quick Staff Adoption",
     name: "Mrs. Bisi Aluko",
     role: "Clinic Administrator, Grace Medical",
     comment:
