@@ -9,16 +9,16 @@ const AuthLayout = () => {
       {/* Header */}
       <Nav />
       {/* Main Content */}
-      <div className="flex mt-25 border border-border-color overflow-hidden rounded-xl md:min-h-[85vh] h-auto ">
+      <div className="flex mt-35 lg:mt-25 border border-border-color overflow-hidden rounded-xl md:h-[100vh] h-auto ">
         <div className="max-md:hidden  w-auto  text-white md:w-1/2">
           <img
             src={image}
             loading="lazy"
-            alt="AI HealthLine"
+            alt="Clyna"
             className="w-full h-full object-cover"
           />
         </div>
-        <div className=" max-md:w-full max-md:shadow-md md:w-1/2 p-4 flex flex-col  justify-center   bg-white lg:p-8">
+        <div className=" max-md:w-full max-md:shadow-md md:w-1/2 p-4 pt-12 px-10 flex flex-col  justify-center bg-white lg:p-10">
           <Outlet />
         </div>
       </div>

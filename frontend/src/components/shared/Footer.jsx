@@ -110,7 +110,7 @@ const Footer = () => {
       </div>
       <hr className="my-6 border-white/30" />
       <div className="text-center text-xs text-white/70">
-        © 2025 AI HealthLine. All rights reserved.
+        © 2025 Clyna. All rights reserved.
       </div>
     </footer>
   );
