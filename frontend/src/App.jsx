@@ -21,7 +21,7 @@ const App = () => {
         <Route path="/Hardworking" element={<HardworkingSection />} />
       </Routes>
     </div>
-  );
+  )
 };
 
-export default App;
+export default App
