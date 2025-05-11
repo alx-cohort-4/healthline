@@ -14,6 +14,7 @@ class TenantSignUpSerializer(serializers.Serializer):
     re_enter_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
 
     def validate(self, data):
+        TenantUser.objects.all().delete()
         # Validates each field that are required to be unique
         if TenantUser.objects.filter(clinic_email=data['clinic_email']).exists():
             raise serializers.ValidationError({'email': 'email already exist'})
@@ -31,9 +32,10 @@ class TenantSignUpSerializer(serializers.Serializer):
     def create(self, validated_data):
         validated_data.pop('re_enter_password')
         data = validated_data
-        print("In here")
+        email = data['clinic_email']
+
         try:
-            TenantUser.objects.create_user(clinic_name=data['clinic_name'], clinic_email=data['clinic_email'],  country=data['country'], phonenumber=data['phonenumber'], address=data['address'], subscription='Basic', website=data['website'] , password=data['password'])
+            TenantUser.objects.create_user(clinic_name=data['clinic_name'], clinic_email=email,  country=data['country'], phonenumber=data['phonenumber'], address=data['address'], subscription='Basic', website=data['website'] , password=data['password'])
             data.pop('password')
             return data
         except Exception:
@@ -45,32 +47,30 @@ class TenantLoginSerializer(serializers.Serializer):
 
     def validate(self, data):
         clinic_email = data['clinic_email']
-        tenant = TenantUser.objects.filter(clinic_email=clinic_email)
-        if tenant:
-            return data
-        raise serializers.ValidationError({'Error': 'Email or password is incorrect!'})
-    
-    # def update(self, instance, validated_data):
-    #     instance.clinic_name = validated_data.get('clinic_name', instance.clinic_name)
-    #     instance.clinic_email = validated_data.get('clinic_email', instance.clinic_email)
-    #     instance.country = validated_data.get('country', instance.country)
-    #     instance.phonenumber = validated_data.get('phonenumber', instance.phonenumber)
-    #     instance.subscription = validated_data.get('subscription', instance.subscription)
-    #     instance.address = validated_data.get('address', instance.address)
-    #     instance.website = validated_data.get('website', instance.website)
-    #     return instance
-
+        try:
+            TenantUser.objects.get(clinic_email=clinic_email)
+        except TenantUser.DoesNotExist:
+            raise serializers.ValidationError({'error': 'Email or password is incorrect!'})
+        except TenantUser.MultipleObjectsReturned:
+            raise serializers.ValidationError({'error': 'Multiple account found for this email'})
+        return data
+        
 class TenantPasswordResetSerializer(serializers.Serializer):
     clinic_email = serializers.EmailField()
 
     def validate_clinic_email(self, value):
-        if not TenantUser.objects.filter(clinic_email=value).exists():
+        try:
+            tenant = TenantUser.objects.get(clinic_email=value)
+        except TenantUser.DoesNotExist:
             return {'error': 'Email does not exist'}
+        except TenantUser.MultipleObjectsReturned:
+            return {'error': 'Multiple account found for this email'}
+        tenant.token_valid = False            
         return value
     
 class TenantPasswordConfirmResetSerializer(serializers.Serializer):
-    password = serializers.CharField(max_length=255)
-    re_enter_password = serializers.CharField(max_length=255)
+    password = serializers.CharField(max_length=255, style={'input_type': 'password'})
+    re_enter_password = serializers.CharField(max_length=255, style={'input_type': 'password'})
 
     def validate(self, data):
         if data['password'] != data['re_enter_password']:
@@ -80,5 +80,3 @@ class TenantPasswordConfirmResetSerializer(serializers.Serializer):
         return data
 
     
-        
-        

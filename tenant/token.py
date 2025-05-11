@@ -1,5 +1,5 @@
 from datetime import datetime, timezone, timedelta
-from django.core.mail import EmailMultiAlternatives, send_mail
+from django.core.mail import EmailMultiAlternatives
 from smtplib import SMTPException, SMTPRecipientsRefused, SMTPSenderRefused, SMTPDataError, SMTPConnectError, SMTPAuthenticationError
 import socket, jwt, os
 from django.template.loader import render_to_string
@@ -28,21 +28,24 @@ def decode_token(token):
         public_key = f.read()
     try:
         decoded = jwt.decode(token, public_key, algorithms=os.getenv("ALGO"))
-        print("In decoded function", decoded)
-        return True
+        return decoded
     except jwt.ExpiredSignatureError:
         print("Token has expired")
-        return False
+        return None
     except jwt.InvalidTokenError:
         print("Invalid token")
-        return False
+        return None
+    except Exception as e:
+        print(e)
+        return None
 
 def send_email(email, user):
     token = send_token_to_verify_email(user)
     subject = "Email Verification"
+    token_link = f"http://127.0.0.1:8000/api/vi/verify-email/{token}/"
     html_content = render_to_string(
-        "tenant/email_verification.html",
-        {"email": email, "token": token}
+        template_name="api/verify_email.html",
+        context={"email": email, "verification_url": token_link}
     )
 
     msg = EmailMultiAlternatives(
@@ -56,53 +59,77 @@ def send_email(email, user):
         msg.send()
     except SMTPAuthenticationError:
         print("SMTP Authentication failed. Check your email credentials.")
+        return None
     except SMTPConnectError:
         print("Failed to connect to the SMTP server. Is it reachable?")
+        return None
     except SMTPRecipientsRefused:
         print("Recipient address was refused by the server.")
+        return None
     except SMTPSenderRefused:
         print("Sender address was refused by the server.")
+        return None
     except SMTPDataError:
         print("SMTP server replied with an unexpected error code (data issue).")
+        return None
     except SMTPException as e:
         print(f"SMTP error occurred: {e}")
+        return None
     except socket.gaierror:
         print("Network error: Unable to resolve SMTP server.")
+        return None
     except socket.timeout:
         print("Network error: SMTP server timed out.")
+        return None
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-
+        return None
 
 def send_reset_password_token(email, user):
     token = send_token_to_verify_email(user)
-    link = f"http://127.0.0.1:8000/api/verify-email/{token}/"
-    wrapped_token = f"Click to reset Password: {link}"
+    token_link = f"http://127.0.0.1:8000/api/v1/verify-password-reset-token/{token}/"
     subject = "Reset Password"
 
-    try:
-        send_mail(
+    html_content = render_to_string(
+        template_name="api/reset_password.html",
+        context={'subject': subject, "verification_url": token_link}
+    )
+
+    msg = EmailMultiAlternatives(
         subject=subject,
-        message=f"Please click this link to verify your email: {wrapped_token}",
-        from_email=os.getenv("EMAIL_HOST_USER"),
-        recipient_list=[email],
-        ) 
-        return token   
+        from_email=os.getenv("EMAIL_HOST_USER"),      
+        to=[email]
+    )
+
+    msg.attach_alternative(content=html_content, mimetype="text/html")
+
+    try:
+        msg.send()  
+        return True
     except SMTPAuthenticationError:
         print("SMTP Authentication failed. Check your email credentials.")
+        return None
     except SMTPConnectError:
         print("Failed to connect to the SMTP server. Is it reachable?")
+        return None
     except SMTPRecipientsRefused:
         print("Recipient address was refused by the server.")
+        return None
     except SMTPSenderRefused:
         print("Sender address was refused by the server.")
+        return None
     except SMTPDataError:
         print("SMTP server replied with an unexpected error code (data issue).")
+        return None
     except SMTPException as e:
         print(f"SMTP error occurred: {e}")
+        return None
     except socket.gaierror:
         print("Network error: Unable to resolve SMTP server.")
+        return None
     except socket.timeout:
         print("Network error: SMTP server timed out.")
+        return None
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+        return None
