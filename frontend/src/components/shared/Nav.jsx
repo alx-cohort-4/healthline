@@ -28,10 +28,8 @@ const Nav = () => {
       >
         <LogoIcon className="w-10 h-10 " />
         <div>
-          <span className="font-bold block text-center text-lg">Clyna</span>
-          <small className=" text-[.4rem] block leading-none">
-            Smartcare Automated
-          </small>
+          <span className="font-bold block text-center text-lg lg:text-[22px]">Clyna</span>
+          
         </div>
       </div>
 

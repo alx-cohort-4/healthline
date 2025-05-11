@@ -3,14 +3,14 @@ import { ChevronDownIcon } from "../../globals/Icons";
 
 const faqs = [
   {
-    question: "What is AI HealthLine and who is it for?",
+    question: "What is Clyna and who is it for?",
     answer:
-      "AI HealthLine is an AI-powered platform designed for clinics and healthcare providers to automate patient communication, appointment reminders, and support.",
+      "Clyna is an AI-powered platform designed for clinics and healthcare providers to automate patient communication, appointment reminders, and support.",
   },
   {
-    question: "Does AI HealthLine make actual calls to patients?",
+    question: "Does Clyna make actual calls to patients?",
     answer:
-      "Yes, AI HealthLine can make automated calls and send messages to patients for appointment reminders and follow-ups.",
+      "Yes, Clyna can make automated calls and send messages to patients for appointment reminders and follow-ups.",
   },
   {
     question: "Can I import patient data from my hospital's EMR?",
