@@ -1,69 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer
 from tenant.models import TenantUser
-from django.shortcuts import redirect
-from django.contrib.auth import login
-from django.contrib import messages
-from django.http import HttpResponse
-import jwt, os
-from tenant.models import TenantUser
-from .tasks import *
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-# from tenant.token import send_reset_password_token, decode_token
-
-class VerifyEmailView(APIView):
-    """
-    View to handle email verification requests
-    """
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request) -> Response:
-        user = request.user
-        email = user.clinic_email
-        username = user.clinic_name
-        email_verified = user.email_verified
-
-        if not email_verified:
-            send_email.delay(email=email, user=username)    
-            return Response({"message": "Verification email sent."}, status=200)
-        return Response({"message": "Email already verified."}, status=200)
-
-class VerifyEmailCompleteView(APIView):
-    """
-    View to handle email verification completion
-    """
-    permission_classes = [AllowAny]
-
-    def get(self, request) -> Response:
-        token = request.GET.get("token")
-        with open('public.pem', 'r') as pub_file:
-            public_key = pub_file.read()
-        try:
-            payload = jwt.decode(token, public_key, os.getenv('ALGO'))
-            user = payload.get("sub")
-        except jwt.ExpiredSignatureError:
-            return Response({"message": "Token has expired"}, status=400)
-        except jwt.InvalidTokenError:
-            return Response({"message": "Invalid token"}, status=400)
-        
-        try:
-            user_exists = TenantUser.objects.get(clinic_email=user)
-            if user_exists:
-                user_exists.email_verified = True
-                user_exists.save()
-                login(request, user_exists)
-                return Response({"message": "Email verified successfully"}, status=200)
-        except TenantUser.DoesNotExist:
-            return Response({"message": "Tenant does not exist"}, status=404)
+from tenant.token import send_reset_password_token, decode_token, send_email
 
 class TenantSignupView(APIView):
     authentication_classes = []
@@ -75,10 +22,8 @@ class TenantSignupView(APIView):
         if serializer.is_valid():  
             # response_data = serializer.validated_data.get('clinic_email')
             response_data = serializer.save()
-            tenant = TenantUser.objects.get(clinic_email=response_data['clinic_email'])
-            login(request, tenant)
-            token = Token.objects.create(user=tenant)
-            return Response(data={'token': token.key}, status=status.HTTP_201_CREATED)   
+            send_email(email=response_data['clinic_email'], user=response_data['clinic_email'])
+            return Response(data={'detail': 'please check your email for verification'}, status=status.HTTP_200_OK)   
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class TenantLoginView(APIView):
@@ -104,10 +49,8 @@ class TenantLogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        print(request.user)
         Token.objects.filter(user=request.user).delete()
         logout(request)
-        print(request.user)
         return Response(data={'success': 'successfully logged user out.'}, status=status.HTTP_200_OK) 
 
 class TenantPasswordResetView(GenericAPIView):
@@ -118,18 +61,71 @@ class TenantPasswordResetView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data.get('clinic_email')            
+            email = serializer.validated_data.get('clinic_email')
             try:
-                return Response(data={'reset_token': send_reset_password_token(email=email, user=email)}, status=status.HTTP_200_OK)
-            except Exception as e:
-                print(e)
+                tenant = TenantUser.objects.get(clinic_email=email)
+                if tenant.email_verified:
+                    send_reset_password_token(email=email, user=email)
+            except TenantUser.DoesNotExist:
+                pass
+            except TenantUser.MultipleObjectsReturned:
+                pass
+            except Exception:
+                pass 
+            # sends 200 status code regardless if email exist or not
+            return Response(data={'detail': 'please check your email to continue.'}, status=status.HTTP_200_OK)                       
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
-    
-def verify_email(request, token):
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])   
+def verify_tenant_email(request, token):
     from django.http import HttpResponse
-    if decode_token(token):
-        return HttpResponse("Verified", True)
-    return HttpResponse("Not Verified", False) 
+    decoded_token = decode_token(token)
+    if not decoded_token:
+        return Response(data={'error': 'invalid or used token'}, status=status.HTTP_400_BAD_REQUEST)
+    email = decoded_token.get('sub') # get the email attached to the token
+    if not email:
+        return Response(data={'error': "Token is missing email info"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        tenant = TenantUser.objects.get(clinic_email=email)
+    except TenantUser.MultipleObjectsReturned:
+        return Response(data={'error': 'multiple account found for the email'}, status=status.HTTP_400_BAD_REQUEST)
+    except TenantUser.DoesNotExist:
+        return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_400_BAD_REQUEST)   
+    if tenant.email_verified:
+        return Response(data={'error': "Tenant has already been verified"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    tenant.email_verified = True
+    tenant.token_valid = True
+    tenant.save()
+    login(request, user=tenant)
+    token, _ = Token.objects.get_or_create(user=tenant)
+    return Response(data={'success': 'user has been registered successfully', 'token': token.key}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def verify_password_token(request, token):
+    decoded_token = decode_token(token=token)
+    if not decoded_token:
+        return Response(data={'error': 'token is valid or expired'}, status=status.HTTP_400_BAD_REQUEST)
+
+    email = decoded_token.get('sub')
+    if not email:
+        return Response(data={'error': 'token is missing email info'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        tenant = TenantUser.objects.get(clinic_email=email)
+        if tenant.email_verified and not tenant.token_valid:
+            pass
+    except TenantUser.DoesNotExist:
+        return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_400_BAD_REQUEST)
+    except TenantUser.MultipleObjectsReturned:
+        return Response(data={'error': 'multiple account found for this email'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception:
+        return Response(data={'error': 'an error occured when decoding the token'}, status=status.HTTP_400_BAD_REQUEST)
+    tenant.token_valid = True
+    return Response(data={'success': 'token is valid'})   
 
 class TenantConfirmResetPasswordView(GenericAPIView):
     authentication_classes = []

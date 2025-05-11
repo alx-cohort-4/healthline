@@ -51,6 +51,7 @@ class TenantUser(TenantModelMixin, AbstractUser):
     address  = models.TextField(null=False, blank=False)
     subscription = models.CharField(max_length=50, null=False, blank=False, default="Basic")
     email_verified = models.BooleanField(default=False)
+    token_valid = models.BooleanField(default=False)
     role = models.CharField(max_length=9, choices=ROLES_CHOICES, default="tenant")
     is_active = models.BooleanField(default=True)
     # Set default to false incase it is a tenant data
