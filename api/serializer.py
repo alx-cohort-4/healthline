@@ -14,7 +14,14 @@ class TenantSignUpSerializer(serializers.Serializer):
     re_enter_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
 
     def validate(self, data):
-        TenantUser.objects.all().delete()
+        """
+        Validates each field that are required to be unique (clinic_email, phonenumber, website) and checks if the password and re-entered password matches.
+
+        :param data: A dictionary containing the data to be validated
+        :raises serializers.ValidationError: If any of the required fields already exist
+        :return: The validated data
+        """
+        # TenantUser.objects.all().delete()
         # Validates each field that are required to be unique
         if TenantUser.objects.filter(clinic_email=data['clinic_email']).exists():
             raise serializers.ValidationError({'email': 'email already exist'})
@@ -30,6 +37,16 @@ class TenantSignUpSerializer(serializers.Serializer):
         return data
 
     def create(self, validated_data):
+        """
+        Creates a new tenant user with the provided validated data after ensuring the password
+        confirmation field is removed and the password is hashed. If account creation fails due
+        to existing unique fields (clinic_email, clinic_name, phonenumber, or website), it raises
+        a ValidationError.
+
+        :param validated_data: A dictionary containing validated data from the serializer
+        :return: The validated data without the password field
+        :raises serializers.ValidationError: If an account already exists with unique field conflicts
+        """
         validated_data.pop('re_enter_password')
         data = validated_data
         email = data['clinic_email']
@@ -39,13 +56,24 @@ class TenantSignUpSerializer(serializers.Serializer):
             data.pop('password')
             return data
         except Exception:
-            raise serializers.ValidationError({"Error": "Account already exist with either clinic_email, clinic_name, phonenumber, or website"})
+            raise serializers.ValidationError(
+                {"Error": "Account already exist with either clinic_email, clinic_name, phonenumber, or website"}
+            )
     
 class TenantLoginSerializer(serializers.Serializer):
     clinic_email = serializers.EmailField()
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
 
     def validate(self, data):
+        """
+        Validates the provided data for tenant login by checking if a tenant with the given
+        clinic_email exists. If a tenant is found, the data is returned as valid. Otherwise,
+        raises a ValidationError indicating that the email or password is incorrect.
+
+        :param data: A dictionary containing the login data to be validated, which includes 'clinic_email'.
+        :raises serializers.ValidationError: If no tenant is found with the provided clinic_email.
+        :return: The validated data if the clinic_email exists in the database.
+        """
         clinic_email = data['clinic_email']
         try:
             TenantUser.objects.get(clinic_email=clinic_email)
@@ -59,6 +87,16 @@ class TenantPasswordResetSerializer(serializers.Serializer):
     clinic_email = serializers.EmailField()
 
     def validate_clinic_email(self, value):
+        """
+        Validates the provided clinic_email by checking if a tenant with the given
+        clinic_email exists in the database. If the email does not exist, it raises a
+        ValidationError with a message "Email does not exist". If the email exists,
+        it returns the validated value.
+
+        :param value: The clinic_email to be validated.
+        :raises serializers.ValidationError: If the email does not exist in the database.
+        :return: The validated value if the email exists in the database.
+        """
         try:
             tenant = TenantUser.objects.get(clinic_email=value)
         except TenantUser.DoesNotExist:
@@ -73,6 +111,16 @@ class TenantPasswordConfirmResetSerializer(serializers.Serializer):
     re_enter_password = serializers.CharField(max_length=255, style={'input_type': 'password'})
 
     def validate(self, data):
+        """
+        Validates the password fields by ensuring that the 'password' and 're_enter_password'
+        fields match. If they do not match, a ValidationError is raised. The 're_enter_password'
+        field is then removed from the data dictionary before returning the validated data.
+
+        :param data: A dictionary containing the data to be validated, which includes 'password'
+                    and 're_enter_password'.
+        :raises serializers.ValidationError: If the 'password' and 're_enter_password' fields do not match.
+        :return: The validated data with the 're_enter_password' field removed.
+        """
         if data['password'] != data['re_enter_password']:
             raise serializers.ValidationError({'error': "password do not match!"})
         data.pop('re_enter_password')

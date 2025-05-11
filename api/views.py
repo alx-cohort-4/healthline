@@ -17,6 +17,21 @@ class TenantSignupView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles the signup request (POST) for tenant. Validates the incoming data using TenantSignUpSerializer,
+        - creates a new tenant user if the data is valid, 
+        - logs the tenant in, 
+        - generates and returns an authentication token.
+        If the data is invalid, it returns an error response with details and a 400 Bad Request status code.
+        
+        Args:
+            request (HttpRequest): The request object containing POST data.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+        
+        Returns:
+            Response: A Response object with a token if signup is successful, or error messages if not.
+        """
         # TenantUser.objects.all().delete()
         serializer = TenantSignUpSerializer(data=request.data)
         if serializer.is_valid():  
@@ -30,17 +45,35 @@ class TenantLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles the login request (POST) for tenant authentication. Validates the incoming data 
+        using TenantLoginSerializer and attempts to authenticate the user. If successful, logs 
+        the user in, generates a new authentication token, and returns it in the response with 
+        status code 202. If authentication fails or the data is invalid, returns an error 
+        response with details and status code 400.
+
+        Args:
+            request (HttpRequest): The request object containing POST data.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            Response: A Response object with a token if login is successful, or error messages if not.
+        """
         serializer = TenantLoginSerializer(data=request.data)
         if serializer.is_valid():
             clinic_email = serializer.validated_data.get('clinic_email')
             password = serializer.validated_data.get('password')  
             user = authenticate(clinic_email=clinic_email, password=password)
+
             if not user:
                 return Response(data={'error': 'Email or password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+            
             login(request, user)
             Token.objects.filter(user=user).delete()
             token = Token.objects.create(user=user)
-            return Response(data={'token': token.key}, status=status.HTTP_202_ACCEPTED)         
+            return Response(data={'token': token.key}, status=status.HTTP_202_ACCEPTED)
+                
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)   
     
 class TenantLogoutView(APIView):
@@ -48,6 +81,18 @@ class TenantLogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles the logout request (POST) for tenant authentication. Deletes the user's authentication token 
+        and logs the user out. Returns a success message with status code 200.
+
+        Args:
+            request (HttpRequest): The request object containing POST data.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            Response: A Response object with a success message and status code 200.
+        """
         Token.objects.filter(user=request.user).delete()
         logout(request)
         return Response(data={'success': 'successfully logged user out.'}, status=status.HTTP_200_OK) 
@@ -58,6 +103,19 @@ class TenantPasswordResetView(GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles the password reset request (POST) for tenant. Validates the incoming data using TenantPasswordResetSerializer, 
+        - sends a password reset token to the user's email address, and 
+        - returns the token in the response with status code 200 if successful, or error messages if not.
+
+        Args:
+            request (HttpRequest): The request object containing POST data.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+        
+        Returns:
+            Response: A Response object with the reset token if reset is successful, or error messages if not.
+        """
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data.get('clinic_email')
@@ -132,6 +190,20 @@ class TenantConfirmResetPasswordView(GenericAPIView):
     serializer_class = TenantPasswordConfirmResetSerializer
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles the password confirmation reset request (POST) for a tenant. Validates the incoming data using
+        TenantPasswordConfirmResetSerializer and attempts to update the tenant's password if the provided data is valid.
+
+        Args:
+            request (HttpRequest): The request object containing POST data.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments, including 'clinic_email' which specifies the email of the tenant.
+
+        Returns:
+            Response: A Response object indicating the success of the password reset with a status code 200,
+                      or error messages with a status code 400 if the reset fails or the data is invalid.
+        """
+
         clinic_email = kwargs['clinic_email']
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
