@@ -6,6 +6,9 @@ import EmailConfirmation from "./components/auth/EmailConfirmation";
 import AuthLayout from "./components/Layout/AuthLayout";
 import LandingPage from "./pages/LandingPage";
 import HardworkingSection from "./components/landing-page/HardworkingSection";
+import TwoFactorAuthPage from "./components/auth/TwoFactorAuthPage";
+
+
 const App = () => {
   return (
     <div className="min-h-screen">
@@ -15,10 +18,9 @@ const App = () => {
           <Route index element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/otp" element={<TwoFactorAuthPage />} />
         </Route>
         <Route path="/email-confirmation" element={<EmailConfirmation />} />
-        <Route path="/features" element={<div>Features Page</div>} />
-        <Route path="/Hardworking" element={<HardworkingSection />} />
       </Routes>
     </div>
   )
