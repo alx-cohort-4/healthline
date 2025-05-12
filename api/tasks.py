@@ -111,22 +111,24 @@ def send_email_password_reset(email, user):
         print(f"An unexpected error occurred: {e}")
 
 
-def decode_token(token):
+def decode_token_val(token):
     with open('public.pem', 'r') as f:
         public_key = f.read()
     try:
         decoded = jwt.decode(token, public_key, algorithms=os.getenv("ALGO"))
         print("In decoded function", decoded)
-        return True
+        return decoded
     except jwt.ExpiredSignatureError:
         print("Token has expired")
-        return False
+        return "Token has expired"
     except jwt.InvalidTokenError:
         print("Invalid token")
-        return False
+        return "Invalid token"
+
+
     
 def send_reset_password_token(email, user):
-    token = send_token_to_verify_email(user)
+    token = send_token_to_verify_email(email)
     send_email_password_reset.delay(email, user)
     return token
 

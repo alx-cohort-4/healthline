@@ -169,11 +169,11 @@ class TenantPasswordResetView(GenericAPIView):
                 print(e)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
     
-def verify_email(request, token):
-    from django.http import HttpResponse
-    if decode_token(token):
-        return HttpResponse("Verified", True)
-    return HttpResponse("Not Verified", False) 
+# def verify_email(request, token):
+#     from django.http import HttpResponse
+#     if decode_token(token):
+#         return HttpResponse("Verified", True)
+#     return HttpResponse("Not Verified", False) 
 
 class TenantConfirmResetPasswordView(GenericAPIView):
     authentication_classes = []
@@ -197,55 +197,55 @@ class TenantConfirmResetPasswordView(GenericAPIView):
             return Response(data={'success': 'password has been changed successfully'}, status=status.HTTP_200_OK)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
-@authentication_classes([])
-@permission_classes([AllowAny])   
-def verify_tenant_email(request, token):
-    from django.http import HttpResponse
-    decoded_token = decode_token(token)
-    if not decoded_token:
-        return Response(data={'error': 'invalid or used token'}, status=status.HTTP_400_BAD_REQUEST)
-    email = decoded_token.get('sub') # get the email attached to the token
-    if not email:
-        return Response(data={'error': "Token is missing email info"}, status=status.HTTP_400_BAD_REQUEST)
-    try:
-        tenant = TenantUser.objects.get(clinic_email=email)
-    except TenantUser.MultipleObjectsReturned:
-        return Response(data={'error': 'multiple account found for the email'}, status=status.HTTP_400_BAD_REQUEST)
-    except TenantUser.DoesNotExist:
-        return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_400_BAD_REQUEST)   
-    if tenant.email_verified:
-        return Response(data={'error': "Tenant has already been verified"}, status=status.HTTP_400_BAD_REQUEST)
+# @api_view(['POST'])
+# @authentication_classes([])
+# @permission_classes([AllowAny])   
+# def verify_tenant_email(request, token):
+#     from django.http import HttpResponse
+#     decoded_token = decode_token(token)
+#     if not decoded_token:
+#         return Response(data={'error': 'invalid or used token'}, status=status.HTTP_400_BAD_REQUEST)
+#     email = decoded_token.get('sub') # get the email attached to the token
+#     if not email:
+#         return Response(data={'error': "Token is missing email info"}, status=status.HTTP_400_BAD_REQUEST)
+#     try:
+#         tenant = TenantUser.objects.get(clinic_email=email)
+#     except TenantUser.MultipleObjectsReturned:
+#         return Response(data={'error': 'multiple account found for the email'}, status=status.HTTP_400_BAD_REQUEST)
+#     except TenantUser.DoesNotExist:
+#         return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_400_BAD_REQUEST)   
+#     if tenant.email_verified:
+#         return Response(data={'error': "Tenant has already been verified"}, status=status.HTTP_400_BAD_REQUEST)
     
-    tenant.email_verified = True
-    tenant.token_valid = True
-    tenant.save()
-    login(request, user=tenant)
-    token, _ = Token.objects.get_or_create(user=tenant)
-    return Response(data={'success': 'user has been registered successfully', 'token': token.key}, status=status.HTTP_200_OK)
+#     tenant.email_verified = True
+#     tenant.token_valid = True
+#     tenant.save()
+#     login(request, user=tenant)
+#     token, _ = Token.objects.get_or_create(user=tenant)
+#     return Response(data={'success': 'user has been registered successfully', 'token': token.key}, status=status.HTTP_200_OK)
 
-@api_view(['POST'])
-@authentication_classes([])
-@permission_classes([AllowAny])
-def verify_password_token(request, token):
-    decoded_token = decode_token(token=token)
-    if not decoded_token:
-        return Response(data={'error': 'token is valid or expired'}, status=status.HTTP_400_BAD_REQUEST)
+# @api_view(['POST'])
+# @authentication_classes([])
+# @permission_classes([AllowAny])
+# def verify_password_token(request, token):
+#     decoded_token = decode_token(token=token)
+#     if not decoded_token:
+#         return Response(data={'error': 'token is valid or expired'}, status=status.HTTP_400_BAD_REQUEST)
 
-    email = decoded_token.get('sub')
-    if not email:
-        return Response(data={'error': 'token is missing email info'}, status=status.HTTP_400_BAD_REQUEST)
-    try:
-        tenant = TenantUser.objects.get(clinic_email=email)
-        if tenant.email_verified and not tenant.token_valid:
-            pass
-    except TenantUser.DoesNotExist:
-        return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_400_BAD_REQUEST)
-    except TenantUser.MultipleObjectsReturned:
-        return Response(data={'error': 'multiple account found for this email'}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception:
-        return Response(data={'error': 'an error occured when decoding the token'}, status=status.HTTP_400_BAD_REQUEST)
-    tenant.token_valid = True
-    return Response(data={'success': 'token is valid'})
+#     email = decoded_token.get('sub')
+#     if not email:
+#         return Response(data={'error': 'token is missing email info'}, status=status.HTTP_400_BAD_REQUEST)
+#     try:
+#         tenant = TenantUser.objects.get(clinic_email=email)
+#         if tenant.email_verified and not tenant.token_valid:
+#             pass
+#     except TenantUser.DoesNotExist:
+#         return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_400_BAD_REQUEST)
+#     except TenantUser.MultipleObjectsReturned:
+#         return Response(data={'error': 'multiple account found for this email'}, status=status.HTTP_400_BAD_REQUEST)
+#     except Exception:
+#         return Response(data={'error': 'an error occured when decoding the token'}, status=status.HTTP_400_BAD_REQUEST)
+#     tenant.token_valid = True
+#     return Response(data={'success': 'token is valid'})
 
  
