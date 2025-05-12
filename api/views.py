@@ -34,7 +34,7 @@ from rest_framework.response import Response
 #         email_verified = user.email_verified
 
 #         if not email_verified:
-#             send_email.delay(email=email, user=username)    
+            # send_email.delay(email=email, user=username)    
 #             return Response({"message": "Verification email sent."}, status=200)
 #         return Response({"message": "Email already verified."}, status=200)
 
@@ -82,29 +82,34 @@ class VerifyPasswordTokenView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
-    def post(self, request) -> Response:
+    def get(self, request) -> Response:
         token = request.GET.get("token")
-        decoded_token = decode_token(token=token)
-        if not decoded_token:
-            return Response(data={'error': 'token is valid or expired'}, status=status.HTTP_400_BAD_REQUEST)
+        if not token:
+            return Response(data={'error': 'token is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        email = decoded_token.get('sub')
-        if not email:
-            return Response(data={'error': 'token is missing email info'}, status=status.HTTP_400_BAD_REQUEST)
-        
         try:
+            decoded_token = decode_token_val(token=token)
+            if not decoded_token:
+                return Response(data={'error': 'token is invalid or expired'}, status=status.HTTP_400_BAD_REQUEST)
+
+            email = decoded_token.get('sub')
+            if not email:
+                return Response(data={'error': 'token is missing email info'}, status=status.HTTP_400_BAD_REQUEST)
+            
             tenant = TenantUser.objects.get(clinic_email=email)
             if tenant.email_verified and not tenant.token_valid:
                 pass
+
+            tenant.token_valid = True
+            tenant.save()
+            return Response(data={'success': 'token is valid'})
+
         except TenantUser.DoesNotExist:
-            return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_404_NOT_FOUND)
         except TenantUser.MultipleObjectsReturned:
             return Response(data={'error': 'multiple account found for this email'}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception:
-            return Response(data={'error': 'an error occured when decoding the token'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        tenant.token_valid = True
-        return Response(data={'success': 'token is valid'})  
+        except Exception as e:
+            return Response(data={'error': f'an error occurred: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
     
 class TenantSignupView(APIView):
     authentication_classes = []
