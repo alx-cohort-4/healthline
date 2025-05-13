@@ -5,6 +5,9 @@ import FAQSection from "../components/landing-page/FAQSection";
 import Footer from "../components/shared/Footer";
 import AnimateSection from "../components/landing-page/AnimateSection";
 import Testimonials from "../components/landing-page/TestimonialSection";
+import PlansSection from "../components/landing-page/PlansSection";
+import CallToActionSection from "../components/landing-page/CallToActionSection";
+
 
 const LandingPage = () => (
   <div className=" flex flex-col min-h-dvh    ">
@@ -14,10 +17,16 @@ const LandingPage = () => (
       <HardworkingSection />
     </AnimateSection>
     <AnimateSection>
+      <PlansSection/>
+    </AnimateSection>
+    <AnimateSection>
       <Testimonials />
     </AnimateSection>
     <AnimateSection>
       <FAQSection />
+    </AnimateSection>
+    <AnimateSection>
+      <CallToActionSection/>
     </AnimateSection>
     <Footer />
   </div>
