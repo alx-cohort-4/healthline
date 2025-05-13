@@ -39,6 +39,7 @@ MIDDLEWARE = [
     'tenant.middleware.MultiTenantMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 REST_FRAMEWORK = {
@@ -54,7 +55,7 @@ REST_FRAMEWORK = {
 
 REST_AUTH = {
     'PASSWORD_RESET_SERIALIZER': 'api.serializer.TenantPasswordResetSerializer',
-    'PASSWORD_RESET_CONFIRM_SERIALIZER': 'dj_rest_auth.serializers.PasswordResetConfirmSerializer',
+    'PASSWORD_RESET_CONFIRM_SERIALIZER': 'api.serializer.TenantPasswordConfirmResetSerializer',
     'PASSWORD_CHANGE_SERIALIZER': 'dj_rest_auth.serializers.PasswordChangeSerializer',
 }
 
@@ -79,16 +80,34 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ai_healthcare_asst.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv("ENGINE"),
-        'NAME': os.getenv("DB_NAME"),     
-        'USER': os.getenv("DB_USER"),          
-        'PASSWORD': os.getenv("DB_PASSWORD"),      
-        'HOST': os.getenv("DB_HOST"),              
-        'PORT': os.getenv("DB_PORT"),                   
+if DEBUG:
+    DATABASES = {
+        'default': 
+        {
+            'ENGINE': os.getenv("ENGINE"),
+            'NAME': os.getenv("DB_NAME"),
+            'USER': os.getenv("DB_USER"),
+            'PASSWORD': os.getenv("DB_PASSWORD"),
+            'HOST': os.getenv("DB_HOST"),
+            'PORT': os.getenv("DB_PORT"),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default':
+        {
+            'ENGINE': os.getenv("P_ENGINE"),
+            'NAME': os.getenv("P_DB_NAME"),
+            'USER': os.getenv("P_DB_USER"),
+            'PASSWORD': os.getenv("P_DB_PASSWORD"),
+            'HOST': os.getenv("P_DB_HOST"),
+            'PORT': os.getenv("P_DB_PORT"),
+            'OPTIONS': {
+                'sslmode': 'require',
+                'sslrootcert': os.path.join(BASE_DIR, 'prod-ca-2021.crt'),
+            },
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -124,20 +143,32 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "tenant.TenantUser"
 
 # Email Settings
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
-EMAIL_HOST = os.getenv("EMAIL_HOST")
-EMAIL_PORT = os.getenv("EMAIL_PORT")
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
-
-# For testing email in development
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+if DEBUG:
+    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+    EMAIL_HOST = os.getenv("EMAIL_HOST")
+    EMAIL_PORT = os.getenv("EMAIL_PORT")
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
+else:
+    EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
+    EMAIL_HOST = os.getenv("P_EMAIL_HOST")
+    EMAIL_PORT = os.getenv("P_EMAIL_PORT")
+    EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
+    EMAIL_USE_TLS = os.getenv("P_EMAIL_USE_TLS")
 
 LOGIN_URL = "/tenant/login/"
 LOGOUT_REDIRECT_URL = "/tenant/login/"
 
-# setup-cors branch
+CELERY_BROKER_URL="redis://localhost:6380/0"
+
+SIMPLE_JWT = {
+        'SIGNING_KEY': open('private.pem', 'r'),
+        'VERIFYING_KEY': open('public.pem', 'r'),
+        'ALGORITHM': os.getenv('ALGO')
+    }
+
 CORS_ALLOWED_ORIGINS = [
     "https://healthline-nu.vercel.app",
     "http://127.0.0.1:3000",
@@ -170,4 +201,3 @@ CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = True
 
 SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
-

@@ -11,3 +11,4 @@ cryptography==44.0.3
 # pip install pillow
 # pip install django-cors-headers
 # pip install dj-rest-auth
+# pip install -U celery[Redis]

@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from django.contrib.auth.forms import PasswordResetForm
-from django.contrib.auth.tokens import default_token_generator
+from rest_framework.authtoken.models import Token
 from tenant.models import TenantUser
 
 class TenantSignUpSerializer(serializers.Serializer):
@@ -40,7 +39,7 @@ class TenantSignUpSerializer(serializers.Serializer):
             return data
         except Exception:
             raise serializers.ValidationError({"Error": "Account already exist with either clinic_email, clinic_name, phonenumber, or website"})
-    
+        
 class TenantLoginSerializer(serializers.Serializer):
     clinic_email = serializers.EmailField()
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
@@ -65,7 +64,9 @@ class TenantPasswordResetSerializer(serializers.Serializer):
             return {'error': 'Email does not exist'}
         except TenantUser.MultipleObjectsReturned:
             return {'error': 'Multiple account found for this email'}
-        tenant.token_valid = False            
+        Token.objects.filter(user=tenant).delete()
+        tenant.token_valid = False
+        tenant.save()            
         return value
     
 class TenantPasswordConfirmResetSerializer(serializers.Serializer):
@@ -79,4 +80,14 @@ class TenantPasswordConfirmResetSerializer(serializers.Serializer):
         print(data, "coming from serializer's class")
         return data
 
-    
+class TenantPasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(max_length=255, style={'input_type': 'password'})
+    new_password = serializers.CharField(max_length=255, style={'input_type': 'password'})
+    confirm_new_password = serializers.CharField(max_length=255, style={'input_type': 'password'})
+
+    def validate(self, data):
+        print(data)
+        if data['new_password'] != data['confirm_new_password']:
+            raise serializers.ValidationError({'error': 'the two new passwords do not match'})
+        data.pop('confirm_new_password')
+        return data
