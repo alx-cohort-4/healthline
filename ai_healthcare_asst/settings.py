@@ -23,9 +23,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tenant',
     'api',
+    # Third party apps
     'rest_framework.authtoken',
     'corsheaders',
     'dj_rest_auth',
+    'django_otp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_totp',  # if you're using TOTP-based OTPs
+
 ]
 
 MIDDLEWARE = [
@@ -34,12 +39,13 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware', 
+    'django_otp.middleware.OTPMiddleware',
     # Custom middleware placed after Authentication
-    'tenant.middleware.MultiTenantMiddleware',
+    'tenant.middleware.MultiTenantMiddleware', 
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+  
 ]
 
 REST_FRAMEWORK = {
@@ -149,7 +155,8 @@ if DEBUG:
     EMAIL_PORT = os.getenv("EMAIL_PORT")
     EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
+    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
+
 else:
     EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
     EMAIL_HOST = os.getenv("P_EMAIL_HOST")
@@ -158,7 +165,7 @@ else:
     EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
     EMAIL_USE_TLS = os.getenv("P_EMAIL_USE_TLS")
 
-LOGIN_URL = "/tenant/login/"
+LOGIN_URL = 'two_factor:login'
 LOGOUT_REDIRECT_URL = "/tenant/login/"
 
 CELERY_BROKER_URL="redis://localhost:6380/0"
@@ -168,6 +175,9 @@ SIMPLE_JWT = {
         'VERIFYING_KEY': open('public.pem', 'r'),
         'ALGORITHM': os.getenv('ALGO')
     }
+
+# Two factor authentication settings
+DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 
 CORS_ALLOWED_ORIGINS = [
     "https://healthline-nu.vercel.app",
@@ -199,5 +209,6 @@ SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
 CSRF_COOKIE_HTTPONLY = True
+CSRF_TRUSTED_ORIGINS = ["https://healthline-nu.vercel.app"]
 
 SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"

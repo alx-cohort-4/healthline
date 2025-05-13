@@ -22,9 +22,12 @@ class TenantSignUpSerializer(serializers.Serializer):
         website = data['website']
         if website and TenantUser.objects.filter(website=website).exists():
             raise serializers.ValidationError({'website': 'website already exist'})
+        if len(data['password']) < 8  or len(data['re_enter_password']) < 8:
+            raise serializers.ValidationError({'password_length': 'minimum length of password required is 8'})
         # Checks if the password match
         if data['password'] != data['re_enter_password']:
             raise serializers.ValidationError({'password': 'password do not match'})
+        print("done")
         print("serializer data: ", data)
         return data
 
@@ -74,6 +77,8 @@ class TenantPasswordConfirmResetSerializer(serializers.Serializer):
     re_enter_password = serializers.CharField(max_length=255, style={'input_type': 'password'})
 
     def validate(self, data):
+        if len(data['password']) < 8 or len(data['re_enter_password']) < 8:
+            raise serializers.ValidationError({'password_length': 'minimum length of password required is 8'})
         if data['password'] != data['re_enter_password']:
             raise serializers.ValidationError({'error': "password do not match!"})
         data.pop('re_enter_password')
@@ -86,7 +91,8 @@ class TenantPasswordChangeSerializer(serializers.Serializer):
     confirm_new_password = serializers.CharField(max_length=255, style={'input_type': 'password'})
 
     def validate(self, data):
-        print(data)
+        if len(data['new_password']) < 8 or len(data['confirm_new_password']) < 8:
+            raise serializers.ValidationError({'password_length': 'minimum length of password required is 8'})
         if data['new_password'] != data['confirm_new_password']:
             raise serializers.ValidationError({'error': 'the two new passwords do not match'})
         data.pop('confirm_new_password')

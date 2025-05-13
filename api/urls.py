@@ -1,7 +1,10 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
+from two_factor.urls import urlpatterns as tf_urls
+
 urlpatterns = [
     path('v1/tenant/signup/', views.TenantSignupView.as_view(), name='tenant_signup'),
+    path('v1/get-otp/', views.get_otp),
     path('v1/tenant/login/', views.TenantLoginView.as_view(), name='login'),
     path('v1/tenant/logout/', views.TenantLogoutView.as_view(), name='logout'),
     path('v1/tenant/verify-email/', views.verify_tenant_email, name='tenant_verify_email'),
