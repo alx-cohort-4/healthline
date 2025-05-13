@@ -11,15 +11,15 @@ const Hero = () => {
             Automated Appointment Calls <br /> & Chat for Your Clinic
           </h1>
           <p className="text-lg text-[#3B485E] mb-6">
-            Streamline patient communication with AI-powered reminders, chat, and booking.
+            Streamline patient communication with Clyna-powered reminders, chat, and booking.
           </p>
           <div className="flex flex-wrap gap-4">
             <button className="bg-[#175CD3] text-white text-base font-semibold px-6 py-3 rounded-lg">
               Get Started
             </button>
-            <button className="bg-[#E0E7FF] text-[#175CD3] text-base font-semibold px-6 py-3 rounded-lg">
+            <button className="text-[#175CD3] border border-[#175CD3] bg-white text-base font-semibold px-6 py-3 rounded-lg">
               Request a Demo
-            </button>
+           </button>
           </div>
         </div>
 
