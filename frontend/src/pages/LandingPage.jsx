@@ -4,11 +4,15 @@ import HardworkingSection from "../components/landing-page/HardworkingSection";
 import FAQSection from "../components/landing-page/FAQSection";
 import Footer from "../components/shared/Footer";
 import AnimateSection from "../components/landing-page/AnimateSection";
+import HealthlineFeatures from "../components/landing-page/HealthlineFeatures";
 
 const LandingPage = () => (
   <div className=" flex flex-col min-h-dvh    ">
     <Nav />
     <HeroSection />
+    <AnimateSection>
+      <HealthlineFeatures />
+    </AnimateSection>
     <AnimateSection>
       <HardworkingSection />
     </AnimateSection>
