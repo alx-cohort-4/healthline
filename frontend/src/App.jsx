@@ -5,25 +5,26 @@ import SignupPage from "./pages/SignupPage";
 import EmailConfirmation from "./components/auth/EmailConfirmation";
 import AuthLayout from "./components/Layout/AuthLayout";
 import LandingPage from "./pages/LandingPage";
-import HardworkingSection from "./components/landing-page/HardworkingSection";
+import Hero from "./components/landing-page/Hero";
 import TwoFactorAuthPage from "./components/auth/TwoFactorAuthPage";
-
 
 const App = () => {
   return (
     <div className="min-h-screen">
       <Routes>
         <Route index element={<LandingPage />} />
+        <Route path="/herohome" element={<Hero />} />
         <Route path="/" element={<AuthLayout />}>
           <Route index element={<LoginPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/otp" element={<TwoFactorAuthPage />} />
+          <Route path="login" element={<LoginPage />} />
+          <Route path="signup" element={<SignupPage />} />
+          <Route path="otp" element={<TwoFactorAuthPage />} />
         </Route>
         <Route path="/email-confirmation" element={<EmailConfirmation />} />
       </Routes>
     </div>
-  )
+  );
 };
 
-export default App
+export default App;
+
