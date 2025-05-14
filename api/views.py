@@ -30,7 +30,7 @@ class TenantSignupView(APIView):
             **kwargs: Additional keyword arguments.
         
         Returns:
-            Response: A Response object with a token if signup is successful, or error messages if not.
+            Response: A Response object with detail asking user to check their email, or error messages if not.
         """
         # TenantUser.objects.all().delete()
         serializer = TenantSignUpSerializer(data=request.data)
