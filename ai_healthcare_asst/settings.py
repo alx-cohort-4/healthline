@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'), override=True)
 SECRET_KEY = os.getenv("TOP_KEY")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "healthline.onrender.com"]
 

@@ -27,6 +27,13 @@ class TenantSignupView(APIView, UpdateModelMixin):
             send_email(email=response_data['clinic_email'])
             return Response(data={'detail': 'please check your email for verification'}, status=status.HTTP_200_OK)   
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, *args, **kwargs):
+        serializer = TenantSignUpSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        print(serializer.validated_data)
+        print("saved")
+        return Response(data={'success': 'details has been updated successfully'}, status=status.HTTP_200_OK)
 
 class TenantLoginView(APIView):
     authentication_classes = []

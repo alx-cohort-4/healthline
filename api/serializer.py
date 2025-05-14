@@ -34,13 +34,18 @@ class TenantSignUpSerializer(serializers.Serializer):
         validated_data.pop('re_enter_password')
         data = validated_data
         email = data['clinic_email']
-
+        print("I am in create function")
         try:
             TenantUser.objects.create_user(clinic_name=data['clinic_name'], clinic_email=email,  country=data['country'], phonenumber=data['phonenumber'], address=data['address'], subscription='Basic', website=data['website'] , password=data['password'])
             data.pop('password')
             return data
         except Exception:
             raise serializers.ValidationError({"Error": "Account already exist with either clinic_email, clinic_name, phonenumber, or website"})
+        
+    def update(self, instance, validated_data):
+        instance.clinic_name = validated_data.get('clinic_name', instance.clinic_name)
+        print(instance.clinic_name)
+        return instance
         
 class TenantLoginSerializer(serializers.Serializer):
     clinic_email = serializers.EmailField()
