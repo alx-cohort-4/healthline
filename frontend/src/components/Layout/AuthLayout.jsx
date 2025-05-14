@@ -10,10 +10,9 @@ const AuthLayout = () => {
       <Nav />
       {/* Main Content */}
       <div className="flex mt-35 lg:mt-25 border border-border-color overflow-hidden rounded-xl  h-fit ">
-        <div className=" text-white md:w-1/2">
+        <div className=" text-white  max-md:hidden md:w-1/2">
           <img
             src={image}
-            loading="lazy"
             alt="Clyna"
             className=" h-full w-full object-cover"
           />

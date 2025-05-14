@@ -1,38 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   ArrowRightIcon,
   Squares2X2Icon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
   CloudArrowUpIcon,
-} from '@heroicons/react/24/outline';
-import { HiAdjustmentsHorizontal } from 'react-icons/hi2';
-import { Wand2 } from 'lucide-react';
+} from "@heroicons/react/24/outline";
+import { HiAdjustmentsHorizontal } from "react-icons/hi2";
+import { Wand2 } from "lucide-react";
 
 const colorClasses = {
   green: {
-    base: 'text-green-800',
-    hover: 'bg-green-800 text-white',
+    base: "text-green-800",
+    hover: "bg-green-800 text-white",
+    border: "#065F46 ",
   },
   blue: {
-    base: 'text-blue-600',
-    hover: 'bg-blue-600 text-white',
+    base: "text-blue-600",
+    hover: "bg-blue-600 text-white",
+    border: "	#2563EB",
   },
   teal: {
-    base: 'text-teal-600',
-    hover: 'bg-teal-600 text-white',
+    base: "text-teal-600",
+    hover: "bg-teal-600 text-white",
+    border: "#0D9488",
   },
   amber: {
-    base: 'text-gray-600',
-    hover: 'bg-gray-600 text-white',
+    base: "text-gray-600",
+    hover: "bg-gray-600 text-white",
+    border: "	#4B5563",
   },
   yellow: {
-    base: 'text-yellow-700',
-    hover: 'bg-yellow-700 text-white',
+    base: "text-yellow-700",
+    hover: "bg-yellow-700 text-white",
+    border: "#A16207",
   },
   purple: {
-    base: 'text-purple-500',
-    hover: 'bg-purple-500 text-white',
+    base: "text-purple-500",
+    hover: "bg-purple-500 text-white",
+    border: "#8B5CF6",
   },
 };
 
@@ -85,12 +91,15 @@ const HealthlineFeatures = () => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   return (
-    <section className="py-16 bg-gray-50 text-gray-800">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl text-center font-bold mb-4">AI HealthLine Features</h2>
+    <section className="py-16 text-gray-800">
+      <div className=" px-4 md:px-12 lg:px-20  mx-auto ">
+        <h2 className="text-3xl text-center font-bold mb-4">
+          AI HealthLine Features
+        </h2>
         <p className="text-lg text-center text-gray-600 mb-12">
-          AI HealthLine automates repetitive tasks, enhances appointment <br /> 
-          management, and simplifies patient engagement—allowing your staff to <br />
+          AI HealthLine automates repetitive tasks, enhances appointment <br />
+          management, and simplifies patient engagement—allowing your staff to{" "}
+          <br />
           focus on quality care delivery.
         </p>
 
@@ -101,21 +110,37 @@ const HealthlineFeatures = () => {
             const isHovered = hoveredIndex === index;
             const iconClass = isHovered ? color.hover : color.base;
 
+            console.log(color?.border);
             return (
               <div
                 key={index}
-                className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
+                className={`bg-white p-6 rounded-lg shadow-sm  hover:shadow-md transition-shadow border-gray-300 [#666666] border ${
+                  feature.color === "green"
+                    ? "hover:border-green-800"
+                    : feature.color === "blue"
+                    ? "hover:border-blue-600"
+                    : feature.color === "teal"
+                    ? "hover:border-teal-600"
+                    : feature.color === "amber"
+                    ? "hover:border-gray-600"
+                    : feature.color === "yellow"
+                    ? "hover:border-yellow-700"
+                    : "hover:border-purple-500"
+                }`}
               >
                 <div
-                  className={`w-10 h-10 rounded-md flex items-center justify-center mb-3 transition-colors duration-200 ${iconClass}`}
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  className={`w-10 h-10 rounded-md shadow-md flex items-center justify-center mb-3 transition-colors duration-200 ${iconClass}`}
                 >
                   <Icon className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                 <p className="text-sm text-gray-700">{feature.description}</p>
-                <a href="#" className="flex items-center text-blue-500 mt-4 hover:underline">
+                <a
+                  href="#"
+                  className="flex items-center text-blue-500 mt-4 hover:underline"
+                >
                   Read More
                   <ArrowRightIcon className="w-5 h-5 ml-4" />
                 </a>
