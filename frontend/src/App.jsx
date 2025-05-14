@@ -5,7 +5,6 @@ import SignupPage from "./pages/SignupPage";
 import EmailConfirmation from "./components/auth/EmailConfirmation";
 import AuthLayout from "./components/Layout/AuthLayout";
 import LandingPage from "./pages/LandingPage";
-import Hero from "./components/landing-page/Hero";
 import TwoFactorAuthPage from "./components/auth/TwoFactorAuthPage";
 
 const App = () => {
@@ -13,7 +12,6 @@ const App = () => {
     <div className="min-h-screen">
       <Routes>
         <Route index element={<LandingPage />} />
-        <Route path="/herohome" element={<Hero />} />
         <Route path="/" element={<AuthLayout />}>
           <Route index element={<LoginPage />} />
           <Route path="login" element={<LoginPage />} />
@@ -27,4 +25,3 @@ const App = () => {
 };
 
 export default App;
-
