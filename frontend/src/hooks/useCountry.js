@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { fetchCountries } from "../api/countries";
+import  useCountriesStore  from "../store/useCountries";
 
 export const useCountries = () => {
-	const [countries, setCountries] = useState([]);
+	const {countries, setCountries} = useCountriesStore();
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
@@ -29,7 +30,7 @@ export const useCountries = () => {
 		};
 
 		loadCountries();
-	}, []);
+	}, [countries, setCountries]);
 
 	return { countries, loading, error };
 };
