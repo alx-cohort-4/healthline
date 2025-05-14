@@ -11,3 +11,5 @@ cryptography==44.0.3
 # pip install pillow
 # pip install django-cors-headers
 # pip install dj-rest-auth
+# pip install -U celery[Redis]
+# pip install django-two-factor-auth and pip install django-two-factor-auth[phonenumbers]

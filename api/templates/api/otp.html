@@ -1,16 +1,16 @@
 {% extends "api/base.html" %}
-{% block title %}Reset your password{% endblock %}
+{% block title %}OTP{% endblock %}
 
 {% block content %}
 <h2 style="color: #333333;">{{ subject }}</h2>
 <p style="font-size: 16px; color: #555555;">
-    Please click on the button below to continue with your request.
+    Please copy the OTP code below to conitnue
 </p>
 
 <p style="text-align: center; margin: 30px 0;">
-    <a href="{{ verification_url }}"
+    <a href=""
        style="display: inline-block; background-color: #007bff; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 5px; font-size: 16px;">
-        Reset Password
+        {{ OTP }}
     </a>
 </p>
 
@@ -20,5 +20,4 @@
 <span>Thank you,</span><br>
 <span>Clyna</span>
 {% endblock %}
-
 

@@ -1,55 +1,49 @@
-from datetime import datetime, timezone, timedelta
-from django.core.mail import EmailMultiAlternatives
 from smtplib import SMTPException, SMTPRecipientsRefused, SMTPSenderRefused, SMTPDataError, SMTPConnectError, SMTPAuthenticationError
+# from celery import shared_task
+from datetime import datetime, timezone, timedelta
 import socket, jwt, os
 from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 from dotenv import load_dotenv
+import random
 load_dotenv()
 
 def expiration_time(minutes=0):
     now = datetime.now(timezone.utc) + timedelta(minutes=minutes)
     return int(now.timestamp())
 
-def send_token_to_verify_email(user):
+def send_token_to_verify_email(email):
     now = int(datetime.now(timezone.utc).timestamp())
     expiry_time = expiration_time(int(os.getenv("TOKEN_EXPIRATION")))
     PAYLOAD = {
         'iat': now,
         'exp': expiry_time,
-        'sub': user
+        'sub': email
     }
+    print("In send_token")
     with open('private.pem', 'r') as file:
         private_key = file.read()
     token = jwt.encode(payload=PAYLOAD, key=private_key, algorithm=os.getenv("ALGO"))
+    print("done token")
     return token
 
-def decode_token(token):
-    with open('public.pem', 'r') as f:
-        public_key = f.read()
-    try:
-        decoded = jwt.decode(token, public_key, algorithms=os.getenv("ALGO"))
-        return decoded
-    except jwt.ExpiredSignatureError:
-        print("Token has expired")
-        return None
-    except jwt.InvalidTokenError:
-        print("Invalid token")
-        return None
-    except Exception as e:
-        print(e)
-        return None
+# @shared_task
+def send_email(email):
+    token = send_token_to_verify_email(email)
+    print(token)
+    token_link = f"{os.getenv('API_URL')}/tenant/verify-email/?token={token}/"
 
-def send_email(email, user):
-    token = send_token_to_verify_email(user)
     subject = "Email Verification"
-    token_link = f"http://127.0.0.1:8000/api/v1/verify-email/{token}/"
+
+    body = "Please verify your email address"
     html_content = render_to_string(
-        template_name="api/verify_email.html",
-        context={"email": email, "verification_url": token_link}
+        "api/verify_email.html",
+        {"email": email, "verification_url": token_link}
     )
 
     msg = EmailMultiAlternatives(
         subject=subject,
+        body=body,
         from_email=os.getenv("EMAIL_HOST_USER"),
         to=[email]
     )
@@ -59,77 +53,73 @@ def send_email(email, user):
         msg.send()
     except SMTPAuthenticationError:
         print("SMTP Authentication failed. Check your email credentials.")
-        return None
     except SMTPConnectError:
         print("Failed to connect to the SMTP server. Is it reachable?")
-        return None
     except SMTPRecipientsRefused:
         print("Recipient address was refused by the server.")
-        return None
     except SMTPSenderRefused:
         print("Sender address was refused by the server.")
-        return None
     except SMTPDataError:
         print("SMTP server replied with an unexpected error code (data issue).")
-        return None
     except SMTPException as e:
         print(f"SMTP error occurred: {e}")
-        return None
     except socket.gaierror:
         print("Network error: Unable to resolve SMTP server.")
-        return None
     except socket.timeout:
         print("Network error: SMTP server timed out.")
-        return None
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        return None
 
-def send_reset_password_token(email, user):
-    token = send_token_to_verify_email(user)
-    token_link = f"http://127.0.0.1:8000/api/v1/verify-password-reset-token/{token}/"
+# @shared_task
+def send_email_password_reset(email):
+    token = send_token_to_verify_email(email)
+    token_link = f"{os.getenv('API_URL')}/tenant/verify-password-reset-token/?token={token}"
     subject = "Reset Password"
 
     html_content = render_to_string(
         template_name="api/reset_password.html",
-        context={'subject': subject, "verification_url": token_link}
+        context={"subject": subject, "verification_url": token_link}
     )
 
     msg = EmailMultiAlternatives(
         subject=subject,
-        from_email=os.getenv("EMAIL_HOST_USER"),      
+        from_email=os.getenv("EMAIL_HOST_USER"),
         to=[email]
     )
-
     msg.attach_alternative(content=html_content, mimetype="text/html")
 
     try:
-        msg.send()  
-        return True
+        msg.send()
     except SMTPAuthenticationError:
         print("SMTP Authentication failed. Check your email credentials.")
-        return None
     except SMTPConnectError:
         print("Failed to connect to the SMTP server. Is it reachable?")
-        return None
     except SMTPRecipientsRefused:
         print("Recipient address was refused by the server.")
-        return None
     except SMTPSenderRefused:
         print("Sender address was refused by the server.")
-        return None
     except SMTPDataError:
         print("SMTP server replied with an unexpected error code (data issue).")
-        return None
     except SMTPException as e:
         print(f"SMTP error occurred: {e}")
-        return None
     except socket.gaierror:
         print("Network error: Unable to resolve SMTP server.")
-        return None
     except socket.timeout:
         print("Network error: SMTP server timed out.")
-        return None
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+
+def decode_token_val(token):
+    with open('public.pem', 'r') as f:
+        public_key = f.read()
+    try:
+        decoded = jwt.decode(token, public_key, algorithms=os.getenv("ALGO"))
+        print("In decoded function", decoded)
+        return decoded
+    except jwt.ExpiredSignatureError:
+        print("Token has expired")
         return None
+    except jwt.InvalidTokenError:
+        print("Invalid token")
+        return None
+    
