@@ -4,8 +4,18 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db.models import Q
+from django_otp.models import Device
+from django.utils.crypto import get_random_string
+from django.utils import timezone
+from dotenv import load_dotenv
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from smtplib import SMTPException, SMTPRecipientsRefused, SMTPSenderRefused, SMTPDataError, SMTPConnectError, SMTPAuthenticationError
+from datetime import timedelta
 from datetime import date
-import uuid
+import os, socket, uuid
+
+load_dotenv()
 
 class TenantUserManager(TenantManagerMixin, BaseUserManager):
     def create_user(self, clinic_name, clinic_email, website, country, phonenumber, subscription, address, password=None, **extra_fields):
@@ -125,3 +135,53 @@ class Patient(TenantModelMixin, models.Model):
     # String representation of the object
     def __str__(self):
         return f"{self.first_name.strip().capitalize()} {self.last_name.strip().capitalize()}"     
+class EmailDeviceOTP(Device, TenantModelMixin):
+    user = models.OneToOneField(TenantUser, on_delete=models.CASCADE, related_name="otp")
+    tenant_id = "user_id"
+    name = None
+    otp_code = models.CharField(max_length=6, null=True, blank=True)
+    valid_until = models.DateTimeField(auto_now_add=True)
+
+    def generate_otp(self):
+        self.otp_code = get_random_string(length=int(os.getenv("OTP_LENGTH")), allowed_chars=os.getenv("OTP_CHARACTERS"))
+        self.valid_until = timezone.now() + timedelta(minutes=int(os.getenv("TOKEN_EXPIRATION")))
+        super().save()
+        subject = "OTP (One Time Password)"
+        html_content = render_to_string(
+            template_name="api/otp.html",
+            context={'OTP': self.otp_code, 'subject': subject}
+        )
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            from_email=os.getenv("EMAIL_HOST_USER"),
+            to=[self.user.clinic_email]
+        )
+        msg.attach_alternative(content=html_content, mimetype="text/html")
+
+        try:
+            msg.send()
+        except SMTPAuthenticationError:
+            print("SMTP Authentication failed. Check your email credentials.")
+        except SMTPConnectError:
+            print("Failed to connect to the SMTP server. Is it reachable?")
+        except SMTPRecipientsRefused:
+            print("Recipient address was refused by the server.")
+        except SMTPSenderRefused:
+            print("Sender address was refused by the server.")
+        except SMTPDataError:
+            print("SMTP server replied with an unexpected error code (data issue).")
+        except SMTPException as e:
+            print(f"SMTP error occurred: {e}")
+        except socket.gaierror:
+            print("Network error: Unable to resolve SMTP server.")
+        except socket.timeout:
+            print("Network error: SMTP server timed out.")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+   
+    def verify_token(self):
+        print(self.valid_until)
+        if timezone.now() > self.valid_until:
+            return True
+        return False
+    

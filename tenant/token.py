@@ -42,7 +42,7 @@ def decode_token(token):
 def send_email(email, user):
     token = send_token_to_verify_email(user)
     subject = "Email Verification"
-    token_link = f"http://127.0.0.1:8000/api/vi/verify-email/{token}/"
+    token_link = f"http://127.0.0.1:8000/api/v1/verify-email/{token}/"
     html_content = render_to_string(
         template_name="api/verify_email.html",
         context={"email": email, "verification_url": token_link}
