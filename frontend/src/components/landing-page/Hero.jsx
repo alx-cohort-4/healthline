@@ -25,7 +25,7 @@ const Hero = () => {
             <Button
               type="submit"
               variant="outline"
-              className="w-fit mb-2 h-[48px] py-4 mt-2 text-base/[24px] font-semibold"
+              className="w-fit mb-2 px-8 h-[48px] py-4 mt-2 text-base/[24px] font-semibold"
             >
               Request a Demo
             </Button>
