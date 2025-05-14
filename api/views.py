@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, UpdateAPIView
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from rest_framework.mixins import UpdateModelMixin
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
@@ -13,14 +14,14 @@ from tenant.models import TenantUser, EmailDeviceOTP
 from django.utils import timezone
 from .tasks import send_email_password_reset, decode_token_val, send_email
 
-class TenantSignupView(APIView):
+class TenantSignupView(APIView, UpdateModelMixin):
     authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         if len(request.data) > 8:
             return Response(data={'info': 'only clinic_email, clinic_name, website, phonenumber, country, address, password, re_enter_password are required'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = TenantSignUpSerializer(data=request.data)
+        serializer = TenantSignUpSerializer(data=request.data, partial=True)
         if serializer.is_valid():  
             response_data = serializer.save()
             send_email(email=response_data['clinic_email'])
