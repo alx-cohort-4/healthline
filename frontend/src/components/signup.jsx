@@ -54,7 +54,10 @@ const Signup = () => {
 
   return (
     <div className="flex w-full bg-white">
-      <form onSubmit={handleSubmit(onSubmit)} className="rounded-lg w-full">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="rounded-lg space-y-4 w-full"
+      >
         <div className="flex items-center text-primary justify-center">
           <div className="flex items-center gap-2 mb-4">
             <LogoIcon className="w-10 h-10 " />
@@ -127,6 +130,7 @@ const Signup = () => {
         <Input
           label="Password"
           type="password"
+          className="mt-4"
           placeholder="Enter your email password"
           required
           showPasswordToggle

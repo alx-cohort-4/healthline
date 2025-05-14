@@ -32,7 +32,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex w-full max-md:w-full bg-white ">
+    <div className="flex w-full h-fit max-md:w-full bg-white ">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white rounded-lg w-full"
