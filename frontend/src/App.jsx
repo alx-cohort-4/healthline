@@ -6,6 +6,7 @@ import EmailConfirmation from "./components/auth/EmailConfirmation";
 import AuthLayout from "./components/Layout/AuthLayout";
 import LandingPage from "./pages/LandingPage";
 import HardworkingSection from "./components/landing-page/HardworkingSection";
+import HealthlineFeatures from "./components/landing-page/HealthlineFeatures";
 import TwoFactorAuthPage from "./components/auth/TwoFactorAuthPage";
 
 
@@ -21,6 +22,9 @@ const App = () => {
           <Route path="/otp" element={<TwoFactorAuthPage />} />
         </Route>
         <Route path="/email-confirmation" element={<EmailConfirmation />} />
+        <Route path="/features" element={<div>Features Page</div>} />
+        <Route path="/Hardworking" element={<HardworkingSection />} />
+        <Route path="/HealthlineFeatures" element={<HealthlineFeatures />} />        
       </Routes>
     </div>
   )
