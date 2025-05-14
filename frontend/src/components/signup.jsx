@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useCountries } from "../hooks/useCountry";
+import useCountriesStore from "../store/useCountries";
 import { LogoIcon } from "../globals/Icons";
 
 const signupSchema = z
@@ -26,9 +26,7 @@ const signupSchema = z
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { countries } = useCountries();
-  console.log("🚀 ~ Signup ~ countries:", countries);
-
+  const countries = useCountriesStore((state) => state.countries);
   const {
     register,
     handleSubmit,
@@ -54,7 +52,10 @@ const Signup = () => {
 
   return (
     <div className="flex w-full bg-white">
-      <form onSubmit={handleSubmit(onSubmit)} className="rounded-lg w-full">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="rounded-lg space-y-4 w-full"
+      >
         <div className="flex items-center text-primary justify-center">
           <div className="flex items-center gap-2 mb-4">
             <LogoIcon className="w-10 h-10 " />
@@ -127,6 +128,7 @@ const Signup = () => {
         <Input
           label="Password"
           type="password"
+          // className="mt-4"
           placeholder="Enter your email password"
           required
           showPasswordToggle
