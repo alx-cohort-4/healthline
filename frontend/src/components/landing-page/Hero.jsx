@@ -4,7 +4,7 @@ import Button from "../ui/Button";
 const Hero = () => {
   return (
     <section className="w-full bg-white  px-4 md:px-12 lg:px-20 py-20">
-      <div className="max-w-[1280px] h-[432px] mx-auto flex flex-col lg:flex-row items-center gap-10">
+      <div className="max-w-[1280px] min-h-[432px] h-auto mx-auto flex flex-col lg:flex-row items-center gap-10">
         {/* Left: Text and CTA */}
         <div className="flex-1 max-w-[600px]">
           <h1 className="text-[40px] leading-tight font-bold text-[#000E43] font-['Inter'] mb-4">
