@@ -97,3 +97,11 @@ class TenantPasswordChangeSerializer(serializers.Serializer):
             raise serializers.ValidationError({'error': 'the two new passwords do not match'})
         data.pop('confirm_new_password')
         return data
+    
+class TenantUpdateSerializer(serializers.Serializer):
+    clinic_name = serializers.CharField(max_length = 255)
+    clinic_email = serializers.EmailField()
+    website = serializers.CharField(required=True, allow_null=True, allow_blank=True, max_length=255)
+    country = serializers.CharField(max_length=255)
+    address = serializers.CharField(max_length=255)
+    phonenumber = serializers.RegexField(max_length=16, regex=r'^\+\d{9,15}$')
