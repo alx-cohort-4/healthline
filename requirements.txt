@@ -6,10 +6,9 @@ psycopg2==2.9.10
 djangorestframework==3.16.0
 django-multitenant==4.1.1
 cryptography==44.0.3
-# pip install  --no-cache-dir django_multitenant
-# pip install cryptography
-# pip install pillow
-# pip install django-cors-headers
-# pip install dj-rest-auth
-# pip install -U celery[Redis]
-# pip install django-two-factor-auth and pip install django-two-factor-auth[phonenumbers]
+pillow==11.2.1
+django-cors-headers==4.7.0
+dj-rest-auth==7.0.1
+celery[redis]==5.3.6
+django-two-factor-auth==1.17.0
+django-two-factor-auth[phonenumbers]

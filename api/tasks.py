@@ -51,6 +51,7 @@ def send_email(email):
 
     try:
         msg.send()
+        print("sent")
     except SMTPAuthenticationError:
         print("SMTP Authentication failed. Check your email credentials.")
     except SMTPConnectError:

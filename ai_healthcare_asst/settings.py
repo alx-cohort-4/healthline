@@ -2,15 +2,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv(os.path.join(BASE_DIR, '.env'), override=True)
 SECRET_KEY = os.getenv("TOP_KEY")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "healthline.onrender.com"]
 
 # Application definition
 
@@ -155,7 +153,7 @@ if DEBUG:
     EMAIL_PORT = os.getenv("EMAIL_PORT")
     EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
+    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL") == "True"
 
 else:
     EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
