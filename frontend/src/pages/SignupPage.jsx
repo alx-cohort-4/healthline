@@ -3,7 +3,7 @@ import Signup from "../components/signup";
 
 const SignupPage = () => {
   return (
-    <div className=" h-auto">
+    <div className=" bg-white h-auto">
       <Signup />
     </div>
   );
