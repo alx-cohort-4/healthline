@@ -84,6 +84,20 @@ class TenantLoginView(APIView):
 @authentication_classes([])
 @permission_classes([AllowAny])
 def get_otp(request, *args, **kwargs):
+    """
+    Handles the OTP verification request (POST) for tenant authentication. Validates the incoming data to ensure
+    that the clinic_email and otp_code are provided. It verifies if the OTP is valid and not expired, logs the user in,
+    generates a new authentication token, and returns it in the response with status code 202. If verification fails
+    or the data is invalid, it returns an error response with details and status code 400.
+
+    Args:
+        request (HttpRequest): The request object containing POST data.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        Response: A Response object with a token if OTP verification is successful, or error messages if not.
+    """
     if len(request.data) > 2:
         return(Response(data={'info': 'only clinic_email and otp_code is required'}, status=status.HTTP_400_BAD_REQUEST))
     clinic_email = request.data.get("clinic_email")
