@@ -2,23 +2,55 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Nav from "../shared/Nav";
 import image from "/images/ailayou.png";
+import { LogoIcon, LogoIconFlip } from "../../globals/Icons";
+import { useNavigate } from "react-router-dom";
 
 const AuthLayout = () => {
+  const navigate = useNavigate();
   return (
-    <div className="flex px-4 md:px-12 lg:px-25 flex-col h-auto min-h-dvh pb-20 ">
-      {/* Header */}
-      <Nav />
-      {/* Main Content */}
-      <div className="flex mt-35 lg:mt-25 border border-border-color overflow-hidden rounded-xl  h-fit ">
-        <div className=" text-white  max-md:hidden md:w-1/2">
+    <div className="min-h-screen">
+      <div className="md:hidden">
+        <Nav />
+      </div>
+
+      <div className="flex max-md:mt-[4rem] flex-col md:flex-row  ">
+        <div className="max-md:w-full max-md:order-1 max-md:rounded-2xl bg-wite  overflow-hidden md:w-1/2 max-md:flex-1 p-4 md:px-10 flex flex-col">
+          <div
+            onClick={() => {
+              navigate("/");
+            }}
+            className="flex max-md:hidden cursor-pointer items-center gap-2 mb-4"
+          >
+            <LogoIcon className="w-10 h-10" />
+            <div>
+              <span className="font-bold block text-center text-lg lg:text-[22px]">
+                Clyna
+              </span>
+            </div>
+          </div>
+          <div className="flex-1">
+            <Outlet />
+          </div>
+        </div>
+        <div className="text-white max-md:bg-primary max-md:flex max-md:items-center max-md:justify-center h-[33vh] md:h-screen md:w-1/2   md:sticky  md:top-0">
+          <div
+            onClick={() => {
+              navigate("/");
+            }}
+            className="flex md:hidden cursor-pointer items-center gap-2 mb-4"
+          >
+            <LogoIconFlip className="w-10 h-10" />
+            <div>
+              <span className="font-bold block text-center text-lg lg:text-[22px]">
+                Clyna
+              </span>
+            </div>
+          </div>
           <img
             src={image}
             alt="Clyna"
-            className=" h-full w-full object-cover"
+            className="h-full max-md:hidden w-full object-cover"
           />
-        </div>
-        <div className=" max-md:w-full max-md:shadow-md h-auto md:w-1/2 p-4 pt-12 px-10 flex flex-col  justify-center bg-white lg:p-10">
-          <Outlet />
         </div>
       </div>
     </div>

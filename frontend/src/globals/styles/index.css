@@ -26,3 +26,29 @@
   --font-size: 16px;
   --font-weight: 400;
 }
+
+.PhoneInput {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.PhoneInputInput {
+  border: none;
+  outline: none;
+  padding: 8px;
+  flex: 1;
+  font-size: 1rem;
+  background: transparent;
+}
+
+.PhoneInputInput:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.PhoneInputCountry {
+  margin-right: 8px;
+}
