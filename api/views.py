@@ -19,6 +19,21 @@ class TenantSignupView(APIView, UpdateModelMixin):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles the signup request (POST) for tenant. Validates the incoming data using TenantSignUpSerializer,
+        - creates a new tenant user if the data is valid, 
+        - logs the tenant in, 
+        - generates and returns an authentication token.
+        If the data is invalid, it returns an error response with details and a 400 Bad Request status code.
+        
+        Args:
+            request (HttpRequest): The request object containing POST data.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+        
+        Returns:
+            Response: A Response object with detail asking user to check their email, or error messages if not.
+        """
         if len(request.data) > 8:
             return Response(data={'info': 'only clinic_email, clinic_name, website, phonenumber, country, address, password, re_enter_password are required'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = TenantSignUpSerializer(data=request.data, partial=True)
@@ -42,11 +57,27 @@ class TenantLoginView(APIView):
     def post(self, request, *args, **kwargs):
         if len(request.data) > 2:
             return Response(data={'info': 'only clinic_email and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+        """
+        Handles the login request (POST) for tenant authentication. Validates the incoming data 
+        using TenantLoginSerializer and attempts to authenticate the user. If successful, logs 
+        the user in, generates a new authentication token, and returns it in the response with 
+        status code 202. If authentication fails or the data is invalid, returns an error 
+        response with details and status code 400.
+
+        Args:
+            request (HttpRequest): The request object containing POST data.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            Response: A Response object with a token if login is successful, or error messages if not.
+        """
         serializer = TenantLoginSerializer(data=request.data)
         if serializer.is_valid():
             clinic_email = serializer.validated_data.get('clinic_email')
             password = serializer.validated_data.get('password') 
             user = authenticate(clinic_email=clinic_email, password=password)
+
             if not user:
                 return Response(data={'error': 'Email or password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
             if EmailDeviceOTP.objects.filter(user=user).exists():
@@ -61,6 +92,20 @@ class TenantLoginView(APIView):
 @authentication_classes([])
 @permission_classes([AllowAny])
 def get_otp(request, *args, **kwargs):
+    """
+    Handles the OTP verification request (POST) for tenant authentication. Validates the incoming data to ensure
+    that the clinic_email and otp_code are provided. It verifies if the OTP is valid and not expired, logs the user in,
+    generates a new authentication token, and returns it in the response with status code 202. If verification fails
+    or the data is invalid, it returns an error response with details and status code 400.
+
+    Args:
+        request (HttpRequest): The request object containing POST data.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        Response: A Response object with a token if OTP verification is successful, or error messages if not.
+    """
     if len(request.data) > 2:
         return(Response(data={'info': 'only clinic_email and otp_code is required'}, status=status.HTTP_400_BAD_REQUEST))
     clinic_email = request.data.get("clinic_email")
@@ -108,6 +153,19 @@ class TenantPasswordResetView(GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles the password reset request (POST) for tenant. Validates the incoming data using TenantPasswordResetSerializer, 
+        - sends a password reset token to the user's email address, and 
+        - returns the token in the response with status code 200 if successful, or error messages if not.
+
+        Args:
+            request (HttpRequest): The request object containing POST data.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments.
+        
+        Returns:
+            Response: A Response object with the reset token if reset is successful, or error messages if not.
+        """
         if len(request.data) > 1:
             return Response(data={'info': 'only email is required'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = self.get_serializer(data=request.data)
@@ -207,6 +265,19 @@ class TenantConfirmResetPasswordView(GenericAPIView):
     serializer_class = TenantPasswordConfirmResetSerializer
 
     def post(self, request, *args, **kwargs):
+        """
+        Handles the password confirmation reset request (POST) for a tenant. Validates the incoming data using
+        TenantPasswordConfirmResetSerializer and attempts to update the tenant's password if the provided data is valid.
+
+        Args:
+            request (HttpRequest): The request object containing POST data.
+            *args: Additional positional arguments.
+            **kwargs: Additional keyword arguments, including 'clinic_email' which specifies the email of the tenant.
+
+        Returns:
+            Response: A Response object indicating the success of the password reset with a status code 200,
+                      or error messages with a status code 400 if the reset fails or the data is invalid.
+        """
         clinic_email = kwargs.get("clinic_email")
         if len(request.data) > 2:
             return Response(data={'info': 'only password and re_enter_password are required'}, status=status.HTTP_400_BAD_REQUEST)
