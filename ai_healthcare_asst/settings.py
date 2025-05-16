@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django_otp',
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',  # if you're using TOTP-based OTPs
+    'phonenumber_field'
 
 ]
 

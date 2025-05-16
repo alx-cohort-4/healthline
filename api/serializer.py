@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from tenant.models import TenantUser
-from .tasks import send_email
+from .tasks import send_email_for_update
 
 class TenantSignUpSerializer(serializers.Serializer):
     clinic_name = serializers.CharField(max_length = 255)
     clinic_email = serializers.EmailField()
-    website = serializers.CharField(allow_null=True, allow_blank=True, max_length=255)
+    website = serializers.CharField(allow_null=True, allow_blank=True, required=False, max_length=255)
     country = serializers.CharField(max_length=255)
     address = serializers.CharField(max_length=255)
     phonenumber = serializers.RegexField(max_length=16, regex=r'^\+\d{9,15}$')
@@ -114,7 +114,7 @@ class ProfileUpdateSerializer(serializers.Serializer):
                 return serializers.ValidationError("You can not use this email to update")
             
             # Trigger email verification
-            send_email(email=new_email)
+            send_email_for_update(email=new_email)
             return (validated_data, "email_for_verification")
         # Track whether anything was updated
         updated_profile = False
@@ -128,7 +128,42 @@ class ProfileUpdateSerializer(serializers.Serializer):
             return instance
         return serializers.ValidationError("No changes detected!")
         
-        
-        
+class DeveloperSignupSerializer(serializers.Serializer):
+    dev_name = serializers.CharField(max_length = 255)
+    dev_email = serializers.EmailField()
+    website = serializers.CharField(allow_null=True, allow_blank=True, required=False, max_length=255)
+    country = serializers.CharField(max_length=255)
+    address = serializers.CharField(max_length=255)
+    phonenumber = serializers.RegexField(max_length=16, regex=r'^\+\d{9,15}$')
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    re_enter_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+
+    def validate(self, data):
+        TenantUser.objects.all().delete()
+        Token.objects.all().delete()
+        # Validates each field that are required to be unique
+        print(data['dev_email'])
+        if TenantUser.objects.filter(clinic_email=data['dev_email']).exists():
+            raise serializers.ValidationError({'email': 'email already exist'})
+        if TenantUser.objects.filter(phonenumber=data['phonenumber']).exists():
+            raise serializers.ValidationError({'phonenumber': 'phonenumber already exist'})
+        if len(data['password']) < 8  or len(data['re_enter_password']) < 8:
+            raise serializers.ValidationError({'password_length': 'minimum length of password required is 8'})
+        # Check if the password match
+        if data['password'] != data['re_enter_password']:
+            raise serializers.ValidationError({'password': 'password do not match'})
+        return data
+
+    def create(self, validated_data):
+        validated_data.pop('re_enter_password')
+        data = validated_data
+        email = data['dev_email']
+        try:
+            TenantUser.objects.create_superuser(clinic_name=data['dev_name'], clinic_email=email,  country=data['country'], phonenumber=data['phonenumber'], address=data['address'], subscription='Basic', website=data['website'], password=data['password'])
+            data.pop('password')
+            return data
+        except Exception:
+            raise serializers.ValidationError({"Error": "Account already exist with either clinic_email, clinic_name, phonenumber, or website"})
+             
 
     
