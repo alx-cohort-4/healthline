@@ -20,18 +20,17 @@ def send_token_to_verify_email(email):
         'exp': expiry_time,
         'sub': email
     }
-    print("In send_token")
     with open('private.pem', 'r') as file:
         private_key = file.read()
     token = jwt.encode(payload=PAYLOAD, key=private_key, algorithm=os.getenv("ALGO"))
-    print("done token")
     return token
 
 # @shared_task
 def send_email(email):
     token = send_token_to_verify_email(email)
-    print(token)
-    token_link = f"{os.getenv('API_URL')}/tenant/verify-email/?token={token}/"
+    token_link = f"{os.getenv('API_URL')}/tenant/verify-email/?token={token}"
+    print(token_link)
+    # token_link = f"{os.getenv('FRONTEND_URL')}/verify-email?token={token}"
 
     subject = "Email Verification"
 

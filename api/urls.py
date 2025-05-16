@@ -11,5 +11,6 @@ urlpatterns = [
     path('v1/tenant/password/reset/', views.TenantPasswordResetView.as_view(), name='tenant_password_reset'),
     path('v1/tenant/verify-password-reset-token/', views.verify_password_token, name='verify_tenant_password_token'),
     path('v1/tenant/password-reset/confirm/<str:clinic_email>/', views.TenantConfirmResetPasswordView.as_view(), name='tenant_password_reset_confirm'),
-    path('v1/tenant/verify-change-password/<str:clinic_email>/', views.TenantChangePassword.as_view(), name='tenant_password_reset_confirm')
+    path('v1/tenant/verify-change-password/<str:clinic_email>/', views.TenantChangePassword.as_view(), name='tenant_password_reset_confirm'),
+    path('v1/profile-update/<str:id>/', views.ProfileUpdateView.as_view()),
 ]

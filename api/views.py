@@ -9,12 +9,12 @@ from rest_framework.mixins import UpdateModelMixin
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
-from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer, TenantPasswordChangeSerializer
+from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer, TenantPasswordChangeSerializer, ProfileUpdateSerializer
 from tenant.models import TenantUser, EmailDeviceOTP
 from django.utils import timezone
 from .tasks import send_email_password_reset, decode_token_val, send_email
 
-class TenantSignupView(APIView, UpdateModelMixin):
+class TenantSignupView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
@@ -28,13 +28,6 @@ class TenantSignupView(APIView, UpdateModelMixin):
             return Response(data={'detail': 'please check your email for verification'}, status=status.HTTP_200_OK)   
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def patch(self, request, *args, **kwargs):
-        serializer = TenantSignUpSerializer(data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        print(serializer.validated_data)
-        print("saved")
-        return Response(data={'success': 'details has been updated successfully'}, status=status.HTTP_200_OK)
-
 class TenantLoginView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
@@ -144,6 +137,7 @@ def verify_tenant_email(request):
         return Response(data={'error': "Token is missing email info"}, status=status.HTTP_400_BAD_REQUEST)
     try:
         tenant = TenantUser.objects.get(clinic_email=email)
+        print("Tenant checked")
     except TenantUser.MultipleObjectsReturned:
         return Response(data={'error': 'multiple account found for the email'}, status=status.HTTP_400_BAD_REQUEST)
     except TenantUser.DoesNotExist:
@@ -152,21 +146,23 @@ def verify_tenant_email(request):
         return Response(data={'error': 'an error occured while verifying user\'s email'}, status=status.HTTP_400_BAD_REQUEST)  
     if tenant.email_verified:
         return Response(data={'error': "Tenant has already been verified"}, status=status.HTTP_400_BAD_REQUEST)
-    
     tenant.email_verified = True
     tenant.token_valid = True
+    tenant.clinic_email = email
     tenant.save()
     login(request, user=tenant)
     token, _ = Token.objects.get_or_create(user=tenant)
     return Response(
         {'data':
             {
+            'id': tenant.id,
             'clinic_name': tenant.clinic_name,
             'clinic_email': tenant.clinic_email,
             'website': tenant.website,
             'phonenumber': tenant.phonenumber,
             'address': tenant.address,
-            'country': tenant.country
+            'country': tenant.country,
+            'date_joined': tenant.date_joined.date()
             },
         'token': token.key
         }, status=status.HTTP_200_OK)
@@ -277,3 +273,46 @@ class TenantLogoutView(APIView):
         Token.objects.filter(user=request.user).delete()
         logout(request)
         return Response(data={'success': 'successfully logged user out.'}, status=status.HTTP_200_OK) 
+    
+class ProfileUpdateView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, id):
+        try:
+            return TenantUser.objects.get(id=id)
+        except TenantUser.DoesNotExist:
+            return None
+        except TenantUser.MultipleObjectsReturned:
+            return None
+        except Exception:
+            return None
+        
+    def patch(self, request, id):
+        user = self.get_object(id)
+        if not user:
+            return Response(data={'error': 'user does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.email_verified and user.token_valid:
+            return Response(data={'error': 'user\'s email has not been verified'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ProfileUpdateSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            value = serializer.save()
+            if type(value) == tuple:
+                return Response(data={'info': 'check email for verification'}, status=status.HTTP_202_ACCEPTED)
+            return Response(data={'success': 'details has been updated successfully'}, status=status.HTTP_200_OK)
+        return Response(data={'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+      
+    def put(self, request, *args, **kwargs):
+        user = self.get_object(id)
+        print(user)
+        if not user:
+            return Response(data={'error': 'user does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.email_verified and user.token_valid:
+            return Response(data={'error': 'user\'s email has not been verified'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ProfileUpdateSerializer(user, data=request.data)
+        if serializer.is_valid():
+            value = serializer.save()
+            if type(value) == tuple:
+                return Response(data={'info': 'check email for verification'}, status=status.HTTP_202_ACCEPTED)
+            return Response(data={'success': 'details has been updated successfully'}, status=status.HTTP_200_OK)
+        return Response(data={'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

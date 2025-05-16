@@ -7,6 +7,7 @@ load_dotenv(os.path.join(BASE_DIR, '.env'), override=True)
 SECRET_KEY = os.getenv("TOP_KEY")
 
 DEBUG = os.getenv("DEBUG", "False") == "True"
+# DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "healthline.onrender.com"]
 
@@ -54,7 +55,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
        
-    ]
+    ],
 }
 
 REST_AUTH = {
@@ -177,9 +178,12 @@ SIMPLE_JWT = {
 # Two factor authentication settings
 DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOWED_ORIGINS = [
     "https://healthline-nu.vercel.app",
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
 ]
 
 # Allow credentials if needed (e.g., cookies, session auth)

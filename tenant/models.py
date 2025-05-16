@@ -98,7 +98,7 @@ class Patient(TenantModelMixin, models.Model):
     phonenumber = models.CharField(max_length=15, null=False, blank=False, validators=[RegexValidator(regex=r'^\+?\d{9,15}$')])
     date_of_birth = models.DateField(null=False)
 
-    # Enforce uniqueness between tenant and pateint.
+    # Enforce uniqueness between tenant and patient.
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["tenant_user", "id"], name="unique_patient_id_per_tenant"), # Human readable name for migration
