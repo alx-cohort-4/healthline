@@ -21,6 +21,7 @@ class TenantSignupView(APIView):
     def post(self, request, *args, **kwargs):
         if len(request.data) > 8:
             return Response(data={'info': 'only clinic_email, clinic_name, website, phonenumber, country, address, password, re_enter_password are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = TenantSignUpSerializer(data=request.data, partial=True)
         if serializer.is_valid():  
             response_data = serializer.save()
