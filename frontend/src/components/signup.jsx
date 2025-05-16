@@ -143,7 +143,7 @@ const Signup = () => {
         />
 
         <Input
-          label="Password"
+          label="Enter Healthcare Faculty"
           type="address"
           // className="mt-4"
           placeholder="Enter your Address"
