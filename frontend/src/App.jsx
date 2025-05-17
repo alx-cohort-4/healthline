@@ -9,6 +9,8 @@ import LandingPage from "./pages/LandingPage";
 import TwoFactorAuthPage from "./components/auth/TwoFactorAuthPage";
 import { fetchCountries } from "./api/countries";
 import useCountriesStore from "./store/useCountries";
+import PasswordResetSuccess from "./components/auth/PasswordResetSuccess";
+import CheckEmail from "./components/auth/CheckEmail";
 
 const App = () => {
   const setCountries = useCountriesStore((state) => state.setCountries);
@@ -44,6 +46,8 @@ const App = () => {
           <Route path="login" element={<LoginPage />} />
           <Route path="signup" element={<SignupPage />} />
           <Route path="otp" element={<TwoFactorAuthPage />} />
+          <Route path="resetsuccess" element={<PasswordResetSuccess />} />
+          <Route path="check" element={<CheckEmail />} />
         </Route>
 
         <Route path="/email-confirmation" element={<EmailConfirmation />} />
