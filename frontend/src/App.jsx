@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import EmailConfirmation from "./components/auth/EmailConfirmation";
+import EmailVerify from "./components/auth/EmailVerify";
 import AuthLayout from "./components/Layout/AuthLayout";
 import LandingPage from "./pages/LandingPage";
 import TwoFactorAuthPage from "./components/auth/TwoFactorAuthPage";
@@ -44,7 +45,9 @@ const App = () => {
           <Route path="signup" element={<SignupPage />} />
           <Route path="otp" element={<TwoFactorAuthPage />} />
         </Route>
+
         <Route path="/email-confirmation" element={<EmailConfirmation />} />
+        <Route path="/verify-email" element={<EmailVerify />} />
       </Routes>
     </div>
   );

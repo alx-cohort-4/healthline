@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Button from "./ui/Button";
 import Input from "./ui/Input";
 import Select from "./ui/Select";
@@ -15,8 +15,8 @@ const signupSchema = z
   .object({
     clinic_name: z.string().min(1, "Clinic name is required"),
     clinic_email: z.string().email("Invalid clinic address"),
-    phone: z.string().refine((value) => isValidPhoneNumber(value), {
-      message: "Invalid phone number",
+    phonenumber: z.string().refine((value) => isValidPhoneNumber(value), {
+      message: "Invalid phoneNumber number",
     }),
     address: z.string().optional(),
     website: z.string().optional(),
@@ -32,18 +32,19 @@ const signupSchema = z
 const Signup = () => {
   const navigate = useNavigate();
   const countries = useCountriesStore((state) => state.countries);
+  const [error, setError] = useState(false);
   const {
     register,
     handleSubmit,
-    isSubmitting,
+
     control,
-    formState: { errors },
+    formState: { isSubmitting, errors },
   } = useForm({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       clinic_name: "",
       clinic_email: "",
-      phone: "",
+      phonenumber: "",
       website: "",
       address: "",
       country: "",
@@ -54,11 +55,18 @@ const Signup = () => {
   });
 
   const onSubmit = async (data) => {
+    setError(false);
     console.log("Signing up with:", data);
     try {
       const response = await registerUser(data);
       console.log("🚀 ~ onSubmit ~ response:", response);
+      navigate("/email-confirmation", {
+        state: {
+          email: data.clinic_email,
+        },
+      });
     } catch (err) {
+      setError(true);
       console.error("Error signing up:", err);
     }
   };
@@ -76,7 +84,11 @@ const Signup = () => {
           Enter the Details of your Healthcare Facility below to create an
           account
         </p>
-
+        {error && (
+          <div role="alert" className="alert alert-error alert-soft">
+            <span>Failed to Sign up</span>
+          </div>
+        )}
         <Input
           label="Healthcare Faculty  Name"
           placeholder="Enter Healthcare Faculty  Name"
@@ -95,7 +107,7 @@ const Signup = () => {
         />
 
         <Controller
-          name="phone"
+          name="phonenumber"
           control={control}
           render={({ field }) => (
             <div>
@@ -107,11 +119,11 @@ const Signup = () => {
                 {...field}
                 international
                 defaultCountry="GH"
-                className="!w-full [&>.PhoneInputInput]:border-none [&>.PhoneInputInput]:outline-none [&>.PhoneInputInput]:bg-transparent [&>.PhoneInputInput]:focus:outline-none "
+                className="!w-full [&>.PhoneNumberInputInput]:border-none [&>.PhoneNumberInputInput]:outline-none [&>.PhoneNumberInputInput]:bg-transparent [&>.PhoneNumberInputInput]:focus:outline-none "
               />
-              {errors.phone && (
+              {errors.phonenumber && (
                 <p className="text-xs text-red-500 mt-1">
-                  {errors.phone.message}
+                  {errors.phonenumber.message}
                 </p>
               )}
             </div>
@@ -177,7 +189,11 @@ const Signup = () => {
           type="submit"
           className="w-full mb-2 min-h-10 py-4 mt-2"
         >
-          {isSubmitting ? "Submitting..." : "Create Account"}
+          {isSubmitting ? (
+            <span className="loading loading-md loading-bars"></span>
+          ) : (
+            "Create Account"
+          )}
         </Button>
 
         <div className="text-center mt-1">
