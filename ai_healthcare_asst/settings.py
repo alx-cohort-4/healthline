@@ -163,7 +163,7 @@ else:
     EMAIL_PORT = os.getenv("P_EMAIL_PORT")
     EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
     EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
-    EMAIL_USE_TLS = os.getenv("P_EMAIL_USE_TLS")
+    EMAIL_USE_SSL = os.getenv("P_EMAIL_USE_SSL")
 
 LOGIN_URL = 'two_factor:login'
 LOGOUT_REDIRECT_URL = "/tenant/login/"
