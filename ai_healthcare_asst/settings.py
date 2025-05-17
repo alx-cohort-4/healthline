@@ -2,18 +2,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-# load_dotenv()
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-load_dotenv(os.path.join(BASE_DIR, '.env'), override=True)
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+load_dotenv(os.path.join(BASE_DIR, '.env'), override=True)
 SECRET_KEY = os.getenv("TOP_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False") == "True"
+# DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "healthline.onrender.com"]
 
 # Application definition
 
@@ -33,6 +29,7 @@ INSTALLED_APPS = [
     'django_otp',
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',  # if you're using TOTP-based OTPs
+    'phonenumber_field'
 
 ]
 
@@ -59,7 +56,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
        
-    ]
+    ],
 }
 
 REST_AUTH = {
@@ -153,24 +150,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "tenant.TenantUser"
 
 # Email Settings
-# if DEBUG:
-#     EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
-#     EMAIL_HOST = os.getenv("EMAIL_HOST")
-#     EMAIL_PORT = os.getenv("EMAIL_PORT")
-#     EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-#     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-    # EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
+if DEBUG:
+    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+    EMAIL_HOST = os.getenv("EMAIL_HOST")
+    EMAIL_PORT = os.getenv("EMAIL_PORT")
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL") == "True"
 
-# else:
-print(os.getenv("P_EMAIL_HOST_USER"))
-EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
-EMAIL_HOST = os.getenv("P_EMAIL_HOST")
-EMAIL_PORT = os.getenv("P_EMAIL_PORT")
-EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.getenv("P_EMAIL_USE_TLS")
-DEFAULT_FROM_EMAIL = os.getenv("P_DEFAULT_FROM_EMAIL")
-
+else:
+    EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
+    EMAIL_HOST = os.getenv("P_EMAIL_HOST")
+    EMAIL_PORT = os.getenv("P_EMAIL_PORT")
+    EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
+    EMAIL_USE_SSL = os.getenv("P_EMAIL_USE_SSL")
 
 LOGIN_URL = 'two_factor:login'
 LOGOUT_REDIRECT_URL = "/tenant/login/"
@@ -186,9 +180,12 @@ SIMPLE_JWT = {
 # Two factor authentication settings
 # DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOWED_ORIGINS = [
     "https://healthline-nu.vercel.app",
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
 ]
 
 # Allow credentials if needed (e.g., cookies, session auth)

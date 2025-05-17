@@ -61,6 +61,7 @@ class TenantUser(TenantModelMixin, AbstractUser):
     address  = models.TextField(null=False, blank=False)
     subscription = models.CharField(max_length=50, null=False, blank=False, default="Basic")
     email_verified = models.BooleanField(default=False)
+    phonenumber_verified = models.BooleanField(default=False)
     token_valid = models.BooleanField(default=False)
     role = models.CharField(max_length=9, choices=ROLES_CHOICES, default="tenant")
     is_active = models.BooleanField(default=True)
@@ -98,7 +99,7 @@ class Patient(TenantModelMixin, models.Model):
     phonenumber = models.CharField(max_length=15, null=False, blank=False, validators=[RegexValidator(regex=r'^\+?\d{9,15}$')])
     date_of_birth = models.DateField(null=False)
 
-    # Enforce uniqueness between tenant and pateint.
+    # Enforce uniqueness between tenant and patient.
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["tenant_user", "id"], name="unique_patient_id_per_tenant"), # Human readable name for migration

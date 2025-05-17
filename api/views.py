@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, UpdateAPIView
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -7,40 +7,12 @@ from rest_framework.authtoken.models import Token
 from rest_framework import status
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
-from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer
-from tenant.models import TenantUser
-from django.shortcuts import redirect
-from django.contrib.auth import login
-from django.contrib import messages
-from django.http import HttpResponse
-import jwt, os
-from tenant.models import TenantUser
-from .tasks import *
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.response import Response
-from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer, TenantPasswordChangeSerializer
+from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer, TenantPasswordChangeSerializer, ProfileUpdateSerializer, DeveloperSignupSerializer
 from tenant.models import TenantUser, EmailDeviceOTP
-from django.utils import timezone
-from .tasks import send_email_password_reset, decode_token_val, send_email
+from .tasks import send_email_password_reset, decode_token_val, send_email, send_dev_email
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+import jwt, os
 
-# from tenant.token import send_reset_password_token, decode_token
-
-# class VerifyEmailView(APIView):
-#     """
-#     View to handle email verification requests
-#     """
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request) -> Response:
-#         user = request.user
-#         email = user.clinic_email
-#         username = user.clinic_name
-#         email_verified = user.email_verified
-
-#         if not email_verified:
-            # send_email.delay(email=email, user=username)    
-#             return Response({"message": "Verification email sent."}, status=200)
-#         return Response({"message": "Email already verified."}, status=200)
 
 class VerifyEmailCompleteView(APIView):
     """
@@ -120,15 +92,16 @@ class TenantSignupView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        if len(request.data) > 8:
+        if len(request.data) > 8 or len(request.data) < 8:
             return Response(data={'info': 'only clinic_email, clinic_name, website, phonenumber, country, address, password, re_enter_password are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = TenantSignUpSerializer(data=request.data)
         if serializer.is_valid():  
             response_data = serializer.save()
             send_email(email=response_data['clinic_email'])
             return Response(data={'detail': 'please check your email for verification'}, status=status.HTTP_200_OK)   
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
 class TenantLoginView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
@@ -238,6 +211,7 @@ def verify_tenant_email(request):
         return Response(data={'error': "Token is missing email info"}, status=status.HTTP_400_BAD_REQUEST)
     try:
         tenant = TenantUser.objects.get(clinic_email=email)
+        print("Tenant checked")
     except TenantUser.MultipleObjectsReturned:
         return Response(data={'error': 'multiple account found for the email'}, status=status.HTTP_400_BAD_REQUEST)
     except TenantUser.DoesNotExist:
@@ -246,21 +220,23 @@ def verify_tenant_email(request):
         return Response(data={'error': 'an error occured while verifying user\'s email'}, status=status.HTTP_400_BAD_REQUEST)  
     if tenant.email_verified:
         return Response(data={'error': "Tenant has already been verified"}, status=status.HTTP_400_BAD_REQUEST)
-    
     tenant.email_verified = True
     tenant.token_valid = True
+    tenant.clinic_email = email
     tenant.save()
     login(request, user=tenant)
     token, _ = Token.objects.get_or_create(user=tenant)
     return Response(
         {'data':
             {
+            'id': tenant.id,
             'clinic_name': tenant.clinic_name,
             'clinic_email': tenant.clinic_email,
             'website': tenant.website,
             'phonenumber': tenant.phonenumber,
             'address': tenant.address,
-            'country': tenant.country
+            'country': tenant.country,
+            'date_joined': tenant.date_joined.date()
             },
         'token': token.key
         }, status=status.HTTP_200_OK)
@@ -371,3 +347,158 @@ class TenantLogoutView(APIView):
         Token.objects.filter(user=request.user).delete()
         logout(request)
         return Response(data={'success': 'successfully logged user out.'}, status=status.HTTP_200_OK) 
+    
+class ProfileUpdateView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, id):
+        try:
+            return TenantUser.objects.get(id=id)
+        except TenantUser.DoesNotExist:
+            return None
+        except TenantUser.MultipleObjectsReturned:
+            return None
+        except Exception:
+            return None
+        
+    def patch(self, request, id):
+        user = self.get_object(id)
+        if not user:
+            return Response(data={'error': 'user does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.email_verified and user.token_valid:
+            return Response(data={'error': 'user\'s email has not been verified'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ProfileUpdateSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            value = serializer.save()
+            if type(value) == tuple:
+                return Response(data={'info': 'check email for verification'}, status=status.HTTP_202_ACCEPTED)
+            return Response(data={
+                'data':{
+                    'id': value.id,
+                    'clinic_name': value.clinic_name,
+                    'clinic_email': value.clinic_email,
+                    'website': value.website,
+                    'phonenumber': value.phonenumber,
+                    'address': value.address,
+                    'country': value.country,
+                    'date_joined': value.date_joined.date(),
+                },
+                'success': 'details has been updated successfully'}, status=status.HTTP_200_OK)
+        return Response(data={'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+      
+    def put(self, request, id):
+        user = self.get_object(id)
+        print(user)
+        if not user:
+            return Response(data={'error': 'user does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        if not user.email_verified and user.token_valid:
+            return Response(data={'error': 'user\'s email has not been verified'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ProfileUpdateSerializer(user, data=request.data)
+        if serializer.is_valid():
+            value = serializer.save()
+            if type(value) == tuple:
+                return Response(data={'info': 'check email for verification'}, status=status.HTTP_202_ACCEPTED) 
+            return Response(data={'success': 'details has been updated successfully'}, status=status.HTTP_200_OK)
+        return Response(data={'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])   
+def verify_email_to_update(request):
+    if len(request.data) > 1:
+        return Response(data={'info': 'only token is allowed in the path parameter, not id data in the body parameter'})
+    token = request.GET.get("token")
+    id = request.data.get("id")
+    if not id:
+        return Response(data={'error': 'id is missing'}, status=status.HTTP_400_BAD_REQUEST)
+    print(id)
+    if not TenantUser.objects.filter(id=id).exists():
+        return Response(data={"error": "id does not exists"}, status=status.HTTP_400_BAD_REQUEST)
+    if not token:
+        return Response(data={'error': 'token is required'}, status=status.HTTP_400_BAD_REQUEST)
+    decoded_token = decode_token_val(token)
+    if not decoded_token:
+        return Response(data={'error': 'invalid or used token'}, status=status.HTTP_400_BAD_REQUEST)
+    email = decoded_token.get('sub') # get the email attached to the token
+    if not email:
+        return Response(data={'error': "Token is missing email info"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        tenant = TenantUser.objects.get(id=id)
+        print("Tenant checked")
+    except TenantUser.MultipleObjectsReturned:
+        return Response(data={'error': 'multiple account found for the email'}, status=status.HTTP_400_BAD_REQUEST)
+    except TenantUser.DoesNotExist:
+        return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_400_BAD_REQUEST) 
+    except Exception as e:
+        return Response(data={'error': 'an error occured while verifying user\'s email'}, status=status.HTTP_400_BAD_REQUEST)  
+    if not tenant.email_verified and not tenant.token_valid:
+        return Response(data={'error': "user's formal email has not been verified"}, status=status.HTTP_400_BAD_REQUEST)
+    tenant.clinic_email = email
+    tenant.save()
+    return Response(data={'success': 'email has been updated successfully'}, status=status.HTTP_202_ACCEPTED)
+
+class DeveloperSignupView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        if len(request.data) > 8 or len(request.data) < 8:
+            return Response(data={'info': 'only clinic_email, clinic_name, website, phonenumber, country, address, password, re_enter_password are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = DeveloperSignupSerializer(data=request.data)
+        if serializer.is_valid():  
+            response_data = serializer.save()
+            send_dev_email(email=response_data['dev_email'])
+            return Response(data={'detail': 'please check your email for verification'}, status=status.HTTP_200_OK)   
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])   
+def verify_developer_email(request):
+    if request.data:
+        return Response(data={'info': 'only token is allowed in the path parameter, not data in the body parameter'})
+    token = request.GET.get("token")
+    if not token:
+        return Response(data={'error': 'token is required'}, status=status.HTTP_400_BAD_REQUEST)
+    decoded_token = decode_token_val(token)
+    if not decoded_token:
+        return Response(data={'error': 'invalid or used token'}, status=status.HTTP_400_BAD_REQUEST)
+    email = decoded_token.get('sub') # get the email attached to the token
+    if not email:
+        return Response(data={'error': "Token is missing email info"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        dev = TenantUser.objects.get(clinic_email=email)
+        print("Tenant checked")
+    except TenantUser.MultipleObjectsReturned:
+        return Response(data={'error': 'multiple account found for the email'}, status=status.HTTP_400_BAD_REQUEST)
+    except TenantUser.DoesNotExist:
+        return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_400_BAD_REQUEST) 
+    except Exception as e:
+        return Response(data={'error': 'an error occured while verifying user\'s email'}, status=status.HTTP_400_BAD_REQUEST)  
+    if dev.email_verified:
+        return Response(data={'error': "Developer has already been verified"}, status=status.HTTP_400_BAD_REQUEST)
+    dev.email_verified = True
+    dev.token_valid = True
+    dev.clinic_email = email
+    dev.role = "developer"
+    # dev.is_superuser = True
+    # dev.is_staff = True
+    dev.save()
+    login(request, user=dev)
+    token, _ = Token.objects.get_or_create(user=dev)
+    return Response(
+        {'data':
+            {
+            'id': dev.id,
+            'clinic_name': dev.clinic_name,
+            'clinic_email': dev.clinic_email,
+            'website': dev.website,
+            'phonenumber': dev.phonenumber,
+            'address': dev.address,
+            'country': dev.country,
+            'date_joined': dev.date_joined.date()
+            },
+        'token': token.key
+        }, status=status.HTTP_200_OK)
