@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tenant', '0004_alter_emaildeviceotp_user'),
+        ('tenant', '0002_seed_initial_data'),
     ]
 
     operations = [
