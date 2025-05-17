@@ -44,7 +44,7 @@ def send_email(email):
     msg = EmailMultiAlternatives(
         subject=subject,
         body=body,
-        from_email=os.getenv("EMAIL_HOST_USER"),
+        from_email=os.getenv("P_EMAIL_HOST_USER"),
         to=[email]
     )
     msg.attach_alternative(html_content, "text/html")
