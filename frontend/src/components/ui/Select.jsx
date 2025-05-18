@@ -5,7 +5,6 @@ import cn from "../../libs/cn";
 
 const Select = React.forwardRef(
   ({ options = [], placeholder, error, label, required, ...props }, ref) => {
-    console.log("🚀 ~ options:", options);
     const [filteredOptions, setFilteredOptions] = useState(options);
 
     useEffect(() => {

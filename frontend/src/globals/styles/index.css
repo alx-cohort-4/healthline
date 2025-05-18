@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@plugin "daisyui" {
+  themes: false;
+}
 
 @theme {
   --color-primary: #175cd3;
@@ -10,14 +13,14 @@
 }
 
 @layer base {
-  @apply text-[#030303]  dark:text-white dark:bg-gray-900 bg-white;
+  @apply text-[#030303]   bg-white;
   @apply font-[var(--font-family)];
   @apply text-base;
   @apply leading-normal;
   @apply tracking-normal;
   @apply transition-all duration-300 ease-in-out;
-  @apply border-gray-300 dark:border-gray-700;
-  @apply shadow-md dark:shadow-lg;
+  @apply border-gray-300;
+  @apply shadow-md;
   @apply focus:outline-none;
 }
 

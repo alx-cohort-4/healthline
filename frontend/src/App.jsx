@@ -1,13 +1,19 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import EmailConfirmation from "./components/auth/EmailConfirmation";
 import AuthLayout from "./components/Layout/AuthLayout";
 import LandingPage from "./pages/LandingPage";
-import TwoFactorAuthPage from "./components/auth/TwoFactorAuthPage";
 import { fetchCountries } from "./api/countries";
 import useCountriesStore from "./store/useCountries";
+import {
+  CheckEmail,
+  PasswordResetSuccess,
+  TwoFactorAuthPage,
+  EmailVerify,
+  EmailConfirmation,
+  ForgetPassword,
+} from "./components/auth/index";
 
 const App = () => {
   const setCountries = useCountriesStore((state) => state.setCountries);
@@ -43,8 +49,13 @@ const App = () => {
           <Route path="login" element={<LoginPage />} />
           <Route path="signup" element={<SignupPage />} />
           <Route path="otp" element={<TwoFactorAuthPage />} />
+          <Route path="resetsuccess" element={<PasswordResetSuccess />} />
+          <Route path="check" element={<CheckEmail />} />
+          <Route path="forgot-password" element={<ForgetPassword />} />
         </Route>
+
         <Route path="/email-confirmation" element={<EmailConfirmation />} />
+        <Route path="/verify-email" element={<EmailVerify />} />
       </Routes>
     </div>
   );
