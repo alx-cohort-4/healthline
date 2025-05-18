@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, Search } from "lucide-react";
-import cn from "../../libs/utils/cn";
+import cn from "../../libs/cn";
 
 const Select = React.forwardRef(
   ({ options = [], placeholder, error, label, required, ...props }, ref) => {
-    console.log("🚀 ~ options:", options);
     const [filteredOptions, setFilteredOptions] = useState(options);
 
     useEffect(() => {

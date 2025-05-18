@@ -19,19 +19,15 @@ const Nav = () => {
   ];
 
   return (
-    <nav className="w-full bg-white text-primary flex items-center justify-between px-4 md:px-12 lg:px-25 py-4 fixed top-0 left-0 shadow-md z-50">
+    <nav className="w-full bg-white text-primary flex items-center justify-between px-4 md:px-12 lg:px-20 py-2 fixed top-0 left-0 shadow-md z-50">
       <div
         onClick={() => {
           navigate("/");
         }}
         className="flex cursor-pointer items-center gap-2 mb-4"
       >
-        <LogoIcon className="w-10 h-10 " />
-        <div>
-          <span className="font-bold block text-center text-lg lg:text-[22px]">
-            Clyna
-          </span>
-        </div>
+        <LogoIcon className=" max-md:w-20 max-md:h-8  " />
+        <div></div>
       </div>
 
       <ul className="hidden lg:flex space-x-6 items-center">
@@ -75,8 +71,8 @@ const Nav = () => {
       </button>
 
       {mobileDrawerOpen && (
-        <div className="fixed bg-black/50 right-0 top-0 z-50 mt-20 w-full h-full h-[25rem]  flex flex-col justify-start items-start lg:hidden">
-          <div className="bg-white w-full h-auto  p-12  p-6 flex flex-col justify-start items-start">
+        <div className="fixed bg-black/50 right-0 -top-5 z-50 mt-20 w-full h-full   flex flex-col justify-start items-start lg:hidden">
+          <div className="bg-white w-full h-auto  md:p-12  p-6 flex flex-col justify-start items-start">
             <ul className="space-y-6 text-left w-full">
               {navItems.map((item) => (
                 <li

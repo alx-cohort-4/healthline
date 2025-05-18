@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import cn from "../../libs/utils/cn";
+import cn from "../../libs/cn";
 
 const Input = forwardRef(
   (

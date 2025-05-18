@@ -1,5 +1,4 @@
-import React from "react";
-import { LogoIcon } from "../../globals/Icons";
+import { SecLogoIconFlip } from "../../globals/Icons";
 import { FaFacebook, FaLinkedin, FaX } from "react-icons/fa6";
 
 const socialLinks = [
@@ -51,17 +50,11 @@ const Footer = () => {
         <div className="flex-1 ">
           <div className="flex items-center gap-2 mb-4">
             {/* Logo Icon */}
-            <LogoIcon className="w-10 h-10 text-white" />
-            <div>
-              <span className="font-bold text-lg">Clyna</span>
-              <div className="text-xs text-white/70 leading-none">
-                Smart Clinic Assistant
-              </div>
-            </div>
+            <SecLogoIconFlip className="max-md:w-20 max-md:h-8 " />
           </div>
-          <div className="italic text-white/80 mb-2 text-sm">
+          <p className="italic text-white/80 mb-2 text-sm">
             Smarter care. Simpler systems.
-          </div>
+          </p>
           <p className="text-white/80 md:w-2/3 text-sm">
             Empowering clinics with AI to streamline appointments, automate
             interactions, and improve patient experiences.
@@ -110,7 +103,7 @@ const Footer = () => {
       </div>
       <hr className="my-6 border-white/30" />
       <div className="text-center text-xs text-white/70">
-        © 2025 Clyna. All rights reserved.
+        © {new Date().getFullYear()} Clyna. All rights reserved.
       </div>
     </footer>
   );

@@ -1,5 +1,5 @@
-import cn from "../../libs/utils/cn";
-import { buttonVariants } from "../../libs/utils/variants";
+import cn from "../../libs/cn";
+import { buttonVariants } from "../../libs/variants";
 import { Slot } from "@radix-ui/react-slot";
 
 const Button = ({
