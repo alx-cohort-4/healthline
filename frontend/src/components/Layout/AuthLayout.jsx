@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import Nav from "../shared/Nav";
-import image from "/images/ailayou.png";
+import image from "/images/auth-image.png";
 import { LogoIcon, LogoIconFlip } from "../../globals/Icons";
 import { useNavigate } from "react-router-dom";
 
@@ -49,7 +49,7 @@ const AuthLayout = () => {
           <img
             src={image}
             alt="Clyna"
-            className="h-full max-md:hidden w-full object-cover"
+            className="h-full max-md:hidden w-full object-center "
           />
         </div>
       </div>

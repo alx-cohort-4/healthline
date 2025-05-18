@@ -7,10 +7,13 @@ const useMe = create(
     (set) => ({
         //state
       me: null,
+      token:null,
 
       //actions
       setMe: (me) => set({me}),
       clearMe: () => set({me: null}),
+      setToken:(token)=>set({token}),
+      clearToken:()=>set({token:null})
     }),
     {
       name: "me-storage",

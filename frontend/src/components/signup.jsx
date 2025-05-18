@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Button from "./ui/Button";
 import Input from "./ui/Input";
 import Select from "./ui/Select";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -187,10 +187,10 @@ const Signup = () => {
         <Button
           disabled={isSubmitting}
           type="submit"
-          className="w-full mb-2 min-h-10 py-4 mt-2"
+          className="w-full cursor-pointer mb-2 min-h-10 py-4 mt-2"
         >
           {isSubmitting ? (
-            <span className="loading loading-md loading-bars"></span>
+            <span className="loading loading-md loading-bars" />
           ) : (
             "Create Account"
           )}
@@ -200,13 +200,13 @@ const Signup = () => {
           <span className="text-xs text-gray-600">
             Already have an account?
           </span>
-          <button
+          <Link
             type="button"
             onClick={() => navigate("/login")}
-            className="text-xs ml-1 text-primary py-4 font-semibold hover:underline"
+            className="text-xs ml-1 text-primary cursor-pointer py-4 font-semibold hover:underline"
           >
             Login
-          </button>
+          </Link>
         </div>
       </form>
     </div>

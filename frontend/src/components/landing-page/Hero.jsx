@@ -1,7 +1,13 @@
 import React from "react";
 import Button from "../ui/Button";
+// import useMe from "../../store/useMe";s
 
 const Hero = () => {
+  // const token = useMe(state=>state.token)
+
+  // const onRequestDemoClick = () => {
+
+  // }
   return (
     <section className="w-full bg-white  px-4 md:px-12 lg:px-20 py-20">
       <div className="max-w-[1280px] min-h-[432px] h-auto mx-auto flex flex-col lg:flex-row items-center gap-10">

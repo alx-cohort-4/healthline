@@ -19,19 +19,15 @@ const Nav = () => {
   ];
 
   return (
-    <nav className="w-full bg-white text-primary flex items-center justify-between px-4 md:px-12 lg:px-25 py-2 fixed top-0 left-0 shadow-md z-50">
+    <nav className="w-full bg-white text-primary flex items-center justify-between px-4 md:px-12 lg:px-20 py-2 fixed top-0 left-0 shadow-md z-50">
       <div
         onClick={() => {
           navigate("/");
         }}
         className="flex cursor-pointer items-center gap-2 mb-4"
       >
-        <LogoIcon className="w-10 h-10 " />
-        <div>
-          <span className="font-bold block text-center text-lg lg:text-[22px]">
-            Clyna
-          </span>
-        </div>
+        <LogoIcon className=" max-md:w-20 max-md:h-8  " />
+        <div></div>
       </div>
 
       <ul className="hidden lg:flex space-x-6 items-center">
