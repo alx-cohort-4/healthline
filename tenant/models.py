@@ -1,6 +1,6 @@
 from django.db import models
 from django_multitenant.mixins import TenantManagerMixin, TenantModelMixin
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager, Group, Permission
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db.models import Q
@@ -186,3 +186,84 @@ class EmailDeviceOTP(Device, TenantModelMixin):
             return True
         return False
     
+class TenantStaffManager(TenantManagerMixin, BaseUserManager):
+    def create_user(self, username, email, position, role, password=None, **extrafields):
+        if not any([username, email, position, role]):
+            raise ValidationError("This field cannot be empty")
+        email = self.normalize_email(email=email)
+        if self.model.objects.filter(email=email).exists() or self.model.objects.filter(username=username).exists():
+            raise ValidationError("email or username already exist!")
+        user = self.model(username=username, email=email, role=role, position=position, **extrafields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+    
+    def create_superuser(self, username, email, role, position, password=None, **extrafields):
+        extrafields.setdefault("is_staff", True)
+        extrafields.setdefault("is_superuser", True)
+        extrafields.setdefault("role", "admin")
+        return self.create_user(username=username, email=email, position=position,password=password, **extrafields)
+        
+class Staff(TenantModelMixin, AbstractUser):
+    ROLE = [
+        ("regular", "regular"),
+        ("admin", "admin")
+    ]
+    first_name = None
+    last_name = None
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant_user = models.ForeignKey(TenantUser, on_delete=models.CASCADE, related_name="staff")
+    tenant_id = "tenant_user_id"
+    username = models.CharField(max_length=255, unique=True, null=False, blank=False)
+    email = models.EmailField(unique=True, null=False, blank=False)
+    position = models.CharField(max_length=255, null=False, blank=False)
+    role = models.CharField(max_length=12, null=False, blank=False, choices=ROLE, default=ROLE[0])
+    email_verified = models.BooleanField(default=False)
+    token_valid = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username", "position"]
+
+    groups = models.ManyToManyField(
+        Group,
+        related_name="tenant_staff_groups",  # Make it unique
+        blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="tenant_staff_permissions",  # Make it unique
+        blank=True
+    )
+
+    objects = TenantStaffManager()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["tenant_user", "id"], name="unique_staff_id_per_tenant"), # Human readable name for migration
+            models.UniqueConstraint(fields=["tenant_user", "email"], name="unique_staff_email_per_tenant") # Human readable name for migration and only enforce uniqueness if email is not null
+        ]
+
+        # Set permissions for tenants over ther patients
+        permissions = [
+            ("can_add_staff", "Can add staff"),
+            ("can_change_staff", "Can change staff"),
+            ("can_view_staff", "Can view staff"),
+            ("can_delete_staff", "Can delete staff")
+        ]
+
+    def save(self, *args, **kwargs):
+        self.email = self.email.strip().lower()
+        self.username = self.username.strip().lower()
+        self.position = self.position.strip().title()
+        self.role = self.role.strip().lower()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.email
+
+    
+
+    
+

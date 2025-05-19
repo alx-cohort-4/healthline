@@ -1,7 +1,7 @@
 from django.db import migrations
 
 # ✅ Directly import models
-from tenant.models import TenantUser, Patient, EmailDeviceOTP
+from tenant.models import TenantUser, Patient, EmailDeviceOTP, Staff
 
 def create_demo_tenant_and_patient(apps, schema_editor):
     # Create a demo clinic/tenant
@@ -37,6 +37,20 @@ def create_demo_tenant_and_patient(apps, schema_editor):
         otp_code = "667744",
         valid_until = "2050-01-01"
     )
+
+    # Tenant Staff
+    Staff.objects.create_user(
+        username="limah",
+        email="limah@gmail.com",
+        position="doctor",
+        role="admin_user",
+        password="limah1234",
+        email_verified = False,
+        token_valid = False,
+        is_active=True,
+        is_staff=False,
+    )
+
 class Migration(migrations.Migration):
 
     dependencies = [

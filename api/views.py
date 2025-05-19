@@ -6,11 +6,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, logout
 from django.contrib.auth.hashers import make_password
-from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer, TenantPasswordChangeSerializer, ProfileUpdateSerializer, DeveloperSignupSerializer
-from tenant.models import TenantUser, EmailDeviceOTP
-from .tasks import send_email_password_reset, decode_token_val, send_email, send_dev_email
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Permission
+from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer, TenantPasswordChangeSerializer, ProfileUpdateSerializer, DeveloperSignupSerializer, StaffSignupSerializer
+from tenant.models import TenantUser, EmailDeviceOTP, Staff, Patient
+from .tasks import send_email_password_reset, decode_token_val, send_email, send_dev_email, send_staff_email
 
 class TenantSignupView(APIView):
     authentication_classes = []
@@ -84,7 +86,6 @@ def get_otp(request, *args, **kwargs):
         return Response(data={'error': 'invalid code provided'}, status=status.HTTP_400_BAD_REQUEST)
     if not email.verify_token():
         return Response(data={'error': 'code has expired'}, status=status.HTTP_400_BAD_REQUEST)
-    login(request, user)
     # Delete any token associated to the user, then create a fresh token
     Token.objects.filter(user=user).delete()
     token = Token.objects.create(user=user)
@@ -149,7 +150,6 @@ def verify_tenant_email(request):
     tenant.token_valid = True
     tenant.clinic_email = email
     tenant.save()
-    login(request, user=tenant)
     token, _ = Token.objects.get_or_create(user=tenant)
     return Response(
         {'data':
@@ -221,7 +221,6 @@ class TenantConfirmResetPasswordView(GenericAPIView):
                 tenant.password = new_password
                 tenant.token_valid = True
                 tenant.save()
-                login(request, tenant)
                 token = Token.objects.create(user=tenant)
                 return Response(data={'token': token.key}, status=status.HTTP_200_OK)           
             return Response(data={'error': 'token has been used by user'}, status=status.HTTP_400_BAD_REQUEST)
@@ -411,7 +410,6 @@ def verify_developer_email(request):
     # dev.is_superuser = True
     # dev.is_staff = True
     dev.save()
-    login(request, user=dev)
     token, _ = Token.objects.get_or_create(user=dev)
     return Response(
         {'data':
@@ -427,3 +425,131 @@ def verify_developer_email(request):
             },
         'token': token.key
         }, status=status.HTTP_200_OK)
+
+class StaffSignupView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        Staff.objects.all().delete()
+        current_user = request.user
+        print(current_user)
+        try:
+            tenant = TenantUser.objects.get(clinic_email=current_user)
+        except TenantUser.DoesNotExist:
+                return Response(data={'error': 'User who is trying to add staff does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        except TenantUser.MultipleObjectsReturned:
+            return Response(data={'error': 'Multiple account found with this user\'s email who is trying to add staff'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(data={'error': 'user\'s email has not been verified, so user cannot add staff!'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if len(request.data) < 5:
+            return Response(data={'info': 'only username, email, position, password, re_enter_password are required as body parameters'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = StaffSignupSerializer(data=request.data)
+        if serializer.is_valid():
+            validated_data = serializer.save()
+            print(validated_data)
+            username = validated_data['username']
+            email = validated_data['email']
+            position = validated_data['position']
+            role = validated_data['role']
+            password = validated_data['password']
+            if Staff.objects.filter(username=username).exists() and Staff.objects.filter(email=email).exists():
+                return Response(data={'error': 'username or email already exists!'})
+            if role == 'regular':
+                Staff.objects.create_user(username=username, email=email, position=position, role=role, password=password, tenant_user=tenant)
+            elif role == 'admin':
+                Staff.objects.create_superuser(username=username, email=email, position=position, role=role, password=password, tenant_user=tenant)
+        
+            validated_data.pop('password')
+            send_staff_email(email=validated_data['email'])
+            return Response(data={'info': 'please check your email for verification'}, status=status.HTTP_202_ACCEPTED)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def verify_staff_email(request):
+    token = request.query_params.get('token')
+    print(token)
+    if request.data:
+        return Response(data={'info': 'only the token is allowed as a query params, no data is allowed in the body params'}, status=status.HTTP_400_BAD_REQUEST)
+    if not token:
+        return Response(data={'error': 'token is required as a query params'}, status=status.HTTP_400_BAD_REQUEST)
+    decoded_token = decode_token_val(token=token)
+    if not decoded_token:
+        return Response(data={'error': 'Invalid, or used, or expired token'}, status=status.HTTP_400_BAD_REQUEST)
+    email = decoded_token['sub']
+    if not email:
+        return Response(data={'error': 'token is missing an email'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        staff = Staff.objects.get(email=email)
+    except Staff.DoesNotExist:
+        return Response(data={'error': 'user does not exists!'}, status=status.HTTP_400_BAD_REQUEST)
+    except Staff.MultipleObjectsReturned:
+        return Response(data={'error': 'multiple account found with this email!'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(e)
+        return Response(data={'error': 'an error occured when searching for this email'}, status=status.HTTP_400_BAD_REQUEST)
+    if staff.email_verified and staff.token_valid:
+        return Response(data={'error': 'this user has been verified before now'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    staff.email_verified = True
+    staff.token_valid = True
+    
+    if staff.role == "regular":
+        try:
+            view_permission = Permission.objects.get(codename="can_view_patient")
+            staff.user_permissions.add(view_permission)
+        except Exception as e:
+            print("Error", e)
+            return None
+        token_exist = Token.objects.filter(user=staff.tenant_user).exists()
+        if token_exist:
+            Token.objects.filter(user=staff.tenant_user).delete()
+        token = Token.objects.create(user=staff.tenant_user)
+        staff.save()
+        return Response(data={
+            'data': {
+                'username': staff.username,
+                'email': staff.email,
+                'position': staff.position,
+                'role': staff.role
+            },
+            'token': token.key
+        }, status=status.HTTP_200_OK)
+    
+    elif staff.role == "admin":
+        staff.email_verified = True
+        staff.token_valid = True
+        content_type_4_patient = ContentType.objects.get_for_model(Patient)
+        try:
+            all_permissions = Permission.objects.filter(content_type=content_type_4_patient,
+                                      codename__in=[
+                                          "can_add_patient",
+                                          "can_view_patient",
+                                          "can_change_patient",
+                                          "can_delete_patient"
+                                      ])
+        except Exception as e:
+            print(e)
+            return None
+
+        staff.user_permissions.set(all_permissions)
+        staff.save()
+        token_exist = Token.objects.filter(user=staff.tenant_user).exists()
+        if token_exist:
+            Token.objects.filter(user=staff.tenant_user).delete()
+        token = Token.objects.create(user=staff.tenant_user)
+        return Response(data={
+            'data': {
+                'username': staff.username,
+                'email': staff.email,
+                'position': staff.position,
+                'role': staff.role
+            },
+            'token': token.key
+            }, status=status.HTTP_200_OK)
+
+
+

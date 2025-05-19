@@ -4,7 +4,6 @@ from two_factor.urls import urlpatterns as tf_urls
 
 urlpatterns = [
     path('v1/tenant/signup/', views.TenantSignupView.as_view(), name='tenant_signup'),
-    
     path('v1/tenant/login/', views.TenantLoginView.as_view(), name='login'),
     path('v1/tenant/logout/', views.TenantLogoutView.as_view(), name='logout'),
     path('v1/tenant/verify-email/', views.verify_tenant_email, name='tenant_verify_email'),
@@ -13,6 +12,9 @@ urlpatterns = [
     path('v1/tenant/password-reset/confirm/<str:clinic_email>/', views.TenantConfirmResetPasswordView.as_view(), name='tenant_password_reset_confirm'),
     path('v1/tenant/verify-change-password/<str:clinic_email>/', views.TenantChangePassword.as_view(), name='tenant_password_reset_confirm'),
     path('v1/tenant/verify-email-update/', views.verify_email_to_update, name='verify_email_update'),
+    # tenant's staff signup and email verification
+    path('v1/tenant-staff/signup/', views.StaffSignupView.as_view()),
+    path('v1/verify-staff-email/', views.verify_staff_email),
     # dev signup and email verification
     path('v1/dev-signup/', views.DeveloperSignupView.as_view(), name='dev_signup'),
     path('v1/verify-dev-email/', views.verify_developer_email, name='verify-dev-email'),

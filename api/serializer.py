@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
-from tenant.models import TenantUser
+from tenant.models import TenantUser, Staff
 from .tasks import send_email_for_update
 
 class TenantSignUpSerializer(serializers.Serializer):
@@ -165,5 +165,31 @@ class DeveloperSignupSerializer(serializers.Serializer):
         except Exception:
             raise serializers.ValidationError({"Error": "Account already exist with either clinic_email, clinic_name, phonenumber, or website"})
              
+class StaffSignupSerializer(serializers.Serializer):
+    Staff.objects.all().delete()
+    username = serializers.CharField(max_length=255)
+    email = serializers.EmailField()
+    position = serializers.CharField(max_length=255)
+    role = serializers.CharField(max_length=255)
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    re_enter_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
 
+    def validate(self, data):
+        if len(data['username']) < 3:
+            raise serializers.ValidationError({'name_error': 'length of name must be greater than 2!'})
+        if len(data['position']) < 3:
+            raise serializers.ValidationError({'position_error': 'length of the position must be greater than 2!'})
+        if data['role'].lower() not in ["admin", "regular"]:
+            raise serializers.ValidationError({'role': 'role must be set to admin or regular!'})
+        if len(data['password']) < 8 or len(data['re_enter_password']) < 8:
+            raise serializers.ValidationError({'password_length': 'length of password must be greater than or equal to 8!'})
+        if data['password'] != data['re_enter_password']:
+            raise serializers.ValidationError({'mismatch': 'passwords do not match!'})
+        data.pop('re_enter_password')
+        return data
     
+    def create(self, validated_data):
+        return validated_data
+    
+
+        
