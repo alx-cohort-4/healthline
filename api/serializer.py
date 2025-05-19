@@ -15,7 +15,7 @@ class TenantSignUpSerializer(serializers.Serializer):
 
     def validate(self, data):
         # TenantUser.objects.all().delete()
-        Token.objects.all().delete()
+        # Token.objects.all().delete()
         # Validates each field that are required to be unique
         if TenantUser.objects.filter(clinic_email=data['clinic_email']).exists():
             raise serializers.ValidationError({'email': 'email already exist'})
