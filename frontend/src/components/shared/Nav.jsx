@@ -27,7 +27,6 @@ const Nav = () => {
         className="flex cursor-pointer items-center gap-2 mb-4"
       >
         <LogoIcon className=" max-md:w-20 max-md:h-8  " />
-        <div></div>
       </div>
 
       <ul className="hidden lg:flex space-x-6 items-center">
