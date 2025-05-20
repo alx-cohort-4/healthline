@@ -201,8 +201,7 @@ const Signup = () => {
             Already have an account?
           </span>
           <Link
-            type="button"
-            onClick={() => navigate("/login")}
+            to="/login"
             className="text-xs ml-1 text-primary cursor-pointer py-4 font-semibold hover:underline"
           >
             Login
