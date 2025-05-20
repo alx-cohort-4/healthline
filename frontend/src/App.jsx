@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import AuthLayout from "./components/Layout/AuthLayout";
 import LandingPage from "./pages/LandingPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import { fetchCountries } from "./api/countries";
 import useCountriesStore from "./store/useCountries";
 import {
@@ -56,6 +57,7 @@ const App = () => {
 
         <Route path="/email-confirmation" element={<EmailConfirmation />} />
         <Route path="/verify-email" element={<EmailVerify />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
   );
