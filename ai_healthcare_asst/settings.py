@@ -86,20 +86,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ai_healthcare_asst.wsgi.application'
 
 # Database
-if DEBUG:
-    DATABASES = {
-        'default': 
-        {
-            'ENGINE': os.getenv("ENGINE"),
-            'NAME': os.getenv("DB_NAME"),
-            'USER': os.getenv("DB_USER"),
-            'PASSWORD': os.getenv("DB_PASSWORD"),
-            'HOST': os.getenv("DB_HOST"),
-            'PORT': os.getenv("DB_PORT"),
-        }
-    }
-else:
-    DATABASES = {
+# if DEBUG:
+#     DATABASES = {
+#         'default': 
+#         {
+#             'ENGINE': os.getenv("ENGINE"),
+#             'NAME': os.getenv("DB_NAME"),
+#             'USER': os.getenv("DB_USER"),
+#             'PASSWORD': os.getenv("DB_PASSWORD"),
+#             'HOST': os.getenv("DB_HOST"),
+#             'PORT': os.getenv("DB_PORT"),
+#         }
+#     }
+# else:
+DATABASES = {
         'default':
         {
             'ENGINE': os.getenv("P_ENGINE"),
@@ -113,7 +113,7 @@ else:
                 'sslrootcert': os.path.join(BASE_DIR, 'prod-ca-2021.crt'),
             },
         }
-    }
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

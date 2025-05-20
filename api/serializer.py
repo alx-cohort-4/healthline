@@ -14,7 +14,7 @@ class TenantSignUpSerializer(serializers.Serializer):
     re_enter_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
 
     def validate(self, data):
-        TenantUser.objects.all().delete()
+        # TenantUser.objects.all().delete()
         Token.objects.all().delete()
         # Validates each field that are required to be unique
         if TenantUser.objects.filter(clinic_email=data['clinic_email']).exists():
@@ -166,7 +166,7 @@ class DeveloperSignupSerializer(serializers.Serializer):
             raise serializers.ValidationError({"Error": "Account already exist with either clinic_email, clinic_name, phonenumber, or website"})
              
 class StaffSignupSerializer(serializers.Serializer):
-    Staff.objects.all().delete()
+    # Staff.objects.all().delete()
     username = serializers.CharField(max_length=255)
     email = serializers.EmailField()
     position = serializers.CharField(max_length=255)
