@@ -1,8 +1,11 @@
 import { MdEmail } from "react-icons/md";
 import { Link } from "react-router-dom";
 import Nav from "../shared/Nav";
+import { useLocation } from "react-router-dom";
 
 export default function EmailConfirmation() {
+  const location = useLocation();
+  const { email } = location.state || {};
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 px-4">
       <Nav />
@@ -22,8 +25,8 @@ export default function EmailConfirmation() {
 
         <p className="text-sm text-gray-600 mb-6">
           A confirmation link has been sent to{" "}
-          <span className="text-primary">youremail@gmail.com</span>. Please
-          check your inbox and click the link to activate your account.
+          <span className="text-primary">{email}</span>. Please check your inbox
+          and click the link to activate your account.
         </p>
 
         <a

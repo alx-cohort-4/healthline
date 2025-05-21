@@ -1,7 +1,10 @@
 import React from "react";
 import Button from "./ui/Button";
 import Input from "./ui/Input";
-import { useNavigate } from "react-router-dom";
+import {
+  //  useNavigate,
+  Link,
+} from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,7 +15,7 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const {
     register,
@@ -32,7 +35,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex w-full max-md:w-full bg-white ">
+    <div className="flex w-full h-fit max-md:w-full bg-white ">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white rounded-lg w-full"
@@ -64,28 +67,26 @@ const Login = () => {
         />
 
         <div className="flex justify-end mb-2">
-          <button
-            type="button"
-            onClick={() => navigate("/forgot-password")}
+          <Link
+            to="/forgot-password"
             className="text-xs cursor-pointer text-primary hover:underline"
           >
             Forgot password?
-          </button>
+          </Link>
         </div>
 
-        <Button type="submit" className="w-full mb-2 min-h-10 py-4 mt-2">
+        <Button type="submit" className="w-full mb-2 h-[48px] py-4 mt-2">
           Login
         </Button>
 
         <div className="text-center mt-1">
           <span className="text-xs text-gray-600">Don't have an account?</span>
-          <button
-            type="button"
-            onClick={() => navigate("/signup")}
+          <Link
+            to="/signup"
             className="text-xs ml-1 cursor-pointer text-primary font-semibold hover:underline"
           >
             Sign Up
-          </button>
+          </Link>
         </div>
       </form>
     </div>

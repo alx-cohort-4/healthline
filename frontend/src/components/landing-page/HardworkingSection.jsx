@@ -31,7 +31,7 @@ export default function HardworkingSection() {
   return (
     <section className="w-full px-4 md:px-12 lg:px-20  max-w-[1280px] mx-auto  py-12">
       <h2 className="max-w-[680px] mx-auto font-bold text-[28px] sm:text-[36px] leading-[36px] sm:leading-[44px] text-center text-[#000E43] font-['Bricolage_Grotesque'] mb-4">
-        How AI Healthline Works
+        How Clyna Works
       </h2>
       <p className="text-center text-[18px] sm:text-[22px] leading-[24px] sm:leading-[28px] font-normal font-['Bricolage_Grotesque'] text-[#3B485E] mb-10 max-w-2xl mx-auto">
         Simple steps to automate your patient communications and appointment

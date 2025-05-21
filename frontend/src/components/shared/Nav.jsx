@@ -19,20 +19,14 @@ const Nav = () => {
   ];
 
   return (
-    <nav className="w-full bg-white text-primary flex items-center justify-between px-4 md:px-12 lg:px-25 py-4 fixed top-0 left-0 shadow-md z-50">
+    <nav className="w-full bg-white text-primary flex items-center justify-between px-4 md:px-12 lg:px-20 py-2 fixed top-0 left-0 shadow-md z-50">
       <div
         onClick={() => {
           navigate("/");
         }}
         className="flex cursor-pointer items-center gap-2 mb-4"
       >
-        <LogoIcon className="w-10 h-10 " />
-        <div>
-          <span className="font-bold block text-center text-lg">Clyna</span>
-          <small className=" text-[.4rem] block leading-none">
-            Smartcare Automated
-          </small>
-        </div>
+        <LogoIcon className=" max-md:w-20 max-md:h-8  " />
       </div>
 
       <ul className="hidden lg:flex space-x-6 items-center">
@@ -76,33 +70,35 @@ const Nav = () => {
       </button>
 
       {mobileDrawerOpen && (
-        <div className="fixed right-0 top-0 z-[55] bg-white w-full h-[25rem] mt-20 p-12 flex flex-col justify-start items-start lg:hidden">
-          <ul className="space-y-6 text-left w-full">
-            {navItems.map((item) => (
-              <li
-                key={item.label}
-                className="hover:bg-[#e6f0ff] px-3 py-2 rounded cursor-pointer active:bg-[#cce0ff]"
-              >
-                <a href={item.href}>{item.label}</a>
-              </li>
-            ))}
-          </ul>
-          {!hideAuthButtons && (
-            <div className="flex flex-col space-y-4 w-[100%] mt-8">
-              <button
-                className="w-full px-4 py-2 text-primary border border-primary rounded"
-                onClick={() => navigate("/login")}
-              >
-                Login
-              </button>
-              <button
-                className="w-full px-4 py-2 bg-primary text-white rounded"
-                onClick={() => navigate("/signup")}
-              >
-                Sign Up
-              </button>
-            </div>
-          )}
+        <div className="fixed bg-black/50 right-0 -top-5 z-50 mt-20 w-full h-full   flex flex-col justify-start items-start lg:hidden">
+          <div className="bg-white w-full h-auto  md:p-12  p-6 flex flex-col justify-start items-start">
+            <ul className="space-y-6 text-left w-full">
+              {navItems.map((item) => (
+                <li
+                  key={item.label}
+                  className="hover:bg-[#e6f0ff] px-3 py-2 rounded cursor-pointer active:bg-[#cce0ff]"
+                >
+                  <a href={item.href}>{item.label}</a>
+                </li>
+              ))}
+            </ul>
+            {!hideAuthButtons && (
+              <div className="flex flex-col space-y-4 w-[100%] mt-8">
+                <button
+                  className="w-full px-4 py-2 text-primary border border-primary rounded"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </button>
+                <button
+                  className="w-full px-4 py-2 bg-primary text-white rounded"
+                  onClick={() => navigate("/signup")}
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </nav>
