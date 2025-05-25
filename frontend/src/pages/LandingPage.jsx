@@ -8,6 +8,9 @@ import Testimonials from "../components/landing-page/TestimonialSection";
 import Hero from "../components/landing-page/Hero";
 import PlansSection from "../components/landing-page/PlansSection";
 import CallToActionSection from "../components/landing-page/CallToActionSection";
+import Card from "../components/ui/DashboardCard";
+import { FaUsers } from "react-icons/fa6";
+import { DashboardHeading } from "../components/ui/DashboardHeading";
 
 const LandingPage = () => (
   <div className=" flex flex-col min-h-dvh    ">
@@ -33,6 +36,23 @@ const LandingPage = () => (
     <AnimateSection>
       <CallToActionSection />
     </AnimateSection>
+    <section className="mb-5">
+      <DashboardHeading title="Clyna Overview" description="Monitor your facility’s AI automation activity, patient engagement, and real-time insights."/>
+      <div className="flex gap-6">
+        <Card className="w-1/4 px-[16px] py-[8px] bg-dashboard-card-color rounded-sm" label="Total Patients" value="0">
+        <FaUsers className="text-primary text-[32px] mb-3 mt-1"></FaUsers>
+      </Card>
+      <Card className="w-1/4 px-[16px] py-[8px] bg-dashboard-card-color rounded-sm" label="Reminders Sent" value="0">
+        <FaUsers className="text-primary text-[32px] mb-3 mt-1"></FaUsers>
+      </Card>
+      <Card className="w-1/4 px-[16px] py-[8px] bg-dashboard-card-color rounded-sm" label="Confirmed Response" value="0">
+        <FaUsers className="text-primary text-[32px] mb-3 mt-1"></FaUsers>
+      </Card>
+      <Card className="w-1/4 px-[16px] py-[8px] bg-dashboard-card-color rounded-sm" label="No Response" value="0">
+        <FaUsers className="text-primary text-[32px] mb-3 mt-1"></FaUsers>
+      </Card>
+      </div>
+    </section>
     <Footer />
   </div>
 );

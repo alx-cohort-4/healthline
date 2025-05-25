@@ -10,6 +10,8 @@
   --font-family: "Poppins", sans-serif;
   --font-size: 16px;
   --font-weight: 400;
+  --color-dashboard-card-color: #F2F2F2;
+  --color-content-secondary: #333333;
 }
 
 @layer base {
