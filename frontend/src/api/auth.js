@@ -2,7 +2,7 @@ import axios from "axios"
 
 
 export const registerUser = async (userData) => {
-    console.log("Sending signup payload:", userData);
+    console.log("Sending signup payload:", userData)
   const API_URL = import.meta.env.VITE_API_URL;
 
   if (!API_URL) {
@@ -17,7 +17,7 @@ export const registerUser = async (userData) => {
       body: JSON.stringify(userData),
     });
     if (!response.ok) {
-     console.log("🚀 ~ registerUser ~ response:", response);
+     console.log("🚀 ~ registerUser ~ response:", response)
       throw new Error("Failed to register user");
     }
   
