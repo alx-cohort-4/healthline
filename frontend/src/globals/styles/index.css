@@ -12,6 +12,7 @@
   --font-weight: 400;
   --color-dashboard-card-color: #F2F2F2;
   --color-content-secondary: #333333;
+  --color-dashboard-fields: #999999
 }
 
 @layer base {
