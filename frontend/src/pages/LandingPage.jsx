@@ -8,6 +8,11 @@ import Testimonials from "../components/landing-page/TestimonialSection";
 import Hero from "../components/landing-page/Hero";
 import PlansSection from "../components/landing-page/PlansSection";
 import CallToActionSection from "../components/landing-page/CallToActionSection";
+import Card from "../components/ui/DashboardCard";
+import { FaAngleDown, FaCalendar, FaMagnifyingGlass, FaUsers } from "react-icons/fa6";
+import { DashboardHeading } from "../components/ui/DashboardHeading";
+import { SelectionField, TextField } from "../components/ui/DashboardFields";
+import { FaCalendarAlt } from "react-icons/fa";
 
 const LandingPage = () => (
   <div className=" flex flex-col min-h-dvh    ">
