@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { WarningIcon } from "../globals/Icons";
-
 const NotFoundPage = () => {
   return (
     <div className="min-h-screen bg-white w-screen   items-center justify-center px-4">
