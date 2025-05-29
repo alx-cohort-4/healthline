@@ -186,3 +186,26 @@ class EmailDeviceOTP(Device, TenantModelMixin):
             return True
         return False
     
+
+class AutomationState(TenantModelMixin, models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant_user = models.ForeignKey(TenantUser, on_delete=models.CASCADE, related_name="automation_state")
+    tenant_id = "tenant_user_id"
+    state = models.BooleanField(default=False)
+
+
+    def __str__(self):
+        return f"{self.tenant_user.clinic_name} - {self.state}"
+
+
+class AutomationScript(TenantModelMixin, models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant_user = models.ForeignKey(TenantUser, on_delete=models.CASCADE, related_name="automation_scripts")
+    tenant_id = "tenant_user_id"
+    script_name = models.CharField(max_length=255, null=False, blank=False)
+    script_code = models.TextField(null=False, blank=False)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.tenant_user.clinic_name} - {self.script_name}"
