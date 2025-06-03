@@ -601,7 +601,8 @@ class AutomationScriptDeleteView(APIView):
         script_id = kwargs.get('script_id')
         try:
             script = AutomationScript.objects.get(id=script_id)
-        except AutomationScript.DoesNotExist:
+        except Exception as e:
+            print(e)
             return Response(data={'error': 'script does not exist'}, status=status.HTTP_400_BAD_REQUEST)
         if script.tenant_user != request.user:
             return Response(data={'error': 'you are not allowed to delete this script'}, status=status.HTTP_400_BAD_REQUEST)
