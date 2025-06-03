@@ -22,4 +22,13 @@ urlpatterns = [
     path('v1/profile-update/<str:id>/', views.ProfileUpdateView.as_view()),
     # OTP for both the tenants and devs
     path('v1/get-otp/', views.get_otp),
+
+    # automation routes
+    # path('v1/tenant/automation/settings/', views.AutomationSettingsView.as_view(), name='automation_settings'),
+    path('v1/tenant/automation/state/', views.automation_state, name='automation_state'),       
+    path('v1/tenant/automation/scripts/', views.AutomationScriptsView.as_view(), name='automation_scripts'),
+    path('v1/tenant/automation/scripts/delete/<str:script_id>/', views.AutomationScriptDeleteView.as_view(), name='automation_script_delete'),
+    # path('v1/tenant/automation/scripts/<str:script_id>/', views.AutomationScriptDetailView.as_view(), name='automation_script_detail'),
+    # path('v1/tenant/automation/schedule/', views.AutomationScheduleView.as_view(), name='automation_schedule'),
+    # path('v1/tenant/automation/test/', views.TestConnectionView.as_view(), name='test_simulation'),
 ]

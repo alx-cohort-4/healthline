@@ -1,11 +1,11 @@
 from django.db import migrations
 
 # ✅ Directly import models
-from tenant.models import TenantUser, Patient, EmailDeviceOTP, Staff
+from tenant.models import TenantUser, Patient, EmailDeviceOTP, Staff, AutomationScript, AutomationState
 
 def create_demo_tenant_and_patient(apps, schema_editor):
     # Create a demo clinic/tenant
-    tenant = TenantUser.objects.create(
+    tenant = TenantUser.objects.create_user(
         clinic_name="Demo Clinic",
         clinic_email="demo@clinic.com",
         website="www.example@gmail.com",
@@ -13,7 +13,6 @@ def create_demo_tenant_and_patient(apps, schema_editor):
         phonenumber="+2348012345678",
         subscription="Basic",
         address="Ikeja, Lagos",
-        # profile_photo = "ndufkjfijfjfoijeeoni"
         password="porkDemoPass12345678",  
         email_verified = False,
         token_valid = False,
@@ -40,6 +39,7 @@ def create_demo_tenant_and_patient(apps, schema_editor):
 
     # Tenant Staff
     Staff.objects.create_user(
+        tenant_user=tenant,
         username="limah",
         email="limah@gmail.com",
         position="doctor",
@@ -49,6 +49,21 @@ def create_demo_tenant_and_patient(apps, schema_editor):
         token_valid = False,
         is_active=True,
         is_staff=False,
+    )
+
+    # Automation state
+    AutomationState.objects.create(
+        tenant_user=tenant,
+        state=False,
+    )
+
+    # Automation script
+    AutomationScript.objects.create(
+        tenant_user=tenant,
+        script_name="Surgery",
+        script_code="Hello Mrs. Patience, your surgery will begin tommorow.",
+        created_at="2025-06-10",
+        updated_at="2025-06-15"
     )
 
 class Migration(migrations.Migration):

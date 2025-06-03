@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
-from tenant.models import TenantUser, Staff
+from tenant.models import TenantUser, Staff, AutomationScript
 from .tasks import send_email_for_update
 
 class TenantSignUpSerializer(serializers.Serializer):
@@ -191,5 +191,20 @@ class StaffSignupSerializer(serializers.Serializer):
     def create(self, validated_data):
         return validated_data
     
+# automation serializers
+class AutomationScriptSerializer(serializers.Serializer):
+    script_name = serializers.CharField(max_length=255)
+    script_code = serializers.CharField(style={'base_template': 'textarea.html'})
+    updated_at = serializers.DateTimeField(read_only=True)
 
-        
+    def validate(self, data):
+        if AutomationScript.objects.filter(script_name=data['script_name']).exists():
+            raise serializers.ValidationError({'error': 'script name already exists, try a different name'})
+        return data
+
+    def create(self, validated_data):
+        try:
+            script = AutomationScript.objects.create(**validated_data)
+            return script
+        except Exception:
+            raise serializers.ValidationError({'error': 'failed to create script'})

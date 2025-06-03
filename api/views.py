@@ -10,8 +10,8 @@ from django.contrib.auth import authenticate, logout
 from django.contrib.auth.hashers import make_password
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
-from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer, TenantPasswordChangeSerializer, ProfileUpdateSerializer, DeveloperSignupSerializer, StaffSignupSerializer
-from tenant.models import TenantUser, EmailDeviceOTP, Staff, Patient
+from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer, TenantPasswordChangeSerializer, ProfileUpdateSerializer, DeveloperSignupSerializer, StaffSignupSerializer, AutomationScriptSerializer
+from tenant.models import TenantUser, EmailDeviceOTP, Staff, Patient, AutomationScript, AutomationState
 from .tasks import send_email_password_reset, decode_token_val, send_email, send_dev_email, send_staff_email
 
 class TenantSignupView(APIView):
@@ -407,8 +407,6 @@ def verify_developer_email(request):
     dev.token_valid = True
     dev.clinic_email = email
     dev.role = "developer"
-    # dev.is_superuser = True
-    # dev.is_staff = True
     dev.save()
     token, _ = Token.objects.get_or_create(user=dev)
     return Response(
@@ -552,4 +550,61 @@ def verify_staff_email(request):
             }, status=status.HTTP_200_OK)
 
 
+# automation views
+
+@api_view(['PATCH'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def automation_state(request):
+    if request.data:
+        return Response(data={'info': 'data in the body parameter is not allowed, just the token in the header'}, status=status.HTTP_400_BAD_REQUEST)
+    toggle_state = request.GET.get('s')
+    automation_state, _ = AutomationState.objects.get_or_create(tenant_user=request.user)       
+    if toggle_state == 'on':
+        if automation_state.state:
+            return Response(data={'success': 'automation is already on'}, status=status.HTTP_200_OK)
+        automation_state.state = True
+        automation_state.save()
+    elif toggle_state == 'off':
+        if not automation_state.state:
+            return Response(data={'success': 'automation is already off'}, status=status.HTTP_200_OK)
+        automation_state.state = False
+        automation_state.save()
+    else:
+        return Response(data={'error': 'invalid state'}, status=status.HTTP_400_BAD_REQUEST)    
+    return Response(data={'success': 'automation state has been updated', 'state': automation_state.state}, status=status.HTTP_200_OK)
+
+
+class AutomationScriptsView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        scripts = AutomationScript.objects.filter(tenant_user=request.user).all()
+        serializer = AutomationScriptSerializer(scripts, many=True)
+        if not scripts:
+            return Response(data={'info': 'no automation scripts found'}, status=status.HTTP_200_OK)
+        return Response(data={'success': 'automation scripts', 'scripts': serializer.data}, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        serializer = AutomationScriptSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data={'success': 'automation script has been created', 'name': serializer.data['script_name']}, status=status.HTTP_200_OK)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AutomationScriptDeleteView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        script_id = kwargs.get('script_id')
+        try:
+            script = AutomationScript.objects.get(id=script_id)
+        except AutomationScript.DoesNotExist:
+            return Response(data={'error': 'script does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        if script.tenant_user != request.user:
+            return Response(data={'error': 'you are not allowed to delete this script'}, status=status.HTTP_400_BAD_REQUEST)
+        script.delete()
+        return Response(data={'success': 'automation script has been deleted'}, status=status.HTTP_200_OK)
 

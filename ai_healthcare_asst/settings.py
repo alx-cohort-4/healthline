@@ -6,8 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'), override=True)
 SECRET_KEY = os.getenv("TOP_KEY")
 
-DEBUG = os.getenv("DEBUG", "False") == "True"
-# DEBUG = True
+# DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = True
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "healthline.onrender.com"]
 
@@ -86,34 +86,34 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ai_healthcare_asst.wsgi.application'
 
 # Database
-# if DEBUG:
-#     DATABASES = {
-#         'default': 
-#         {
-#             'ENGINE': os.getenv("ENGINE"),
-#             'NAME': os.getenv("DB_NAME"),
-#             'USER': os.getenv("DB_USER"),
-#             'PASSWORD': os.getenv("DB_PASSWORD"),
-#             'HOST': os.getenv("DB_HOST"),
-#             'PORT': os.getenv("DB_PORT"),
-#         }
-#     }
-# else:
-DATABASES = {
-        'default':
+if DEBUG:
+    DATABASES = {
+        'default': 
         {
-            'ENGINE': os.getenv("P_ENGINE"),
-            'NAME': os.getenv("P_DB_NAME"),
-            'USER': os.getenv("P_DB_USER"),
-            'PASSWORD': os.getenv("P_DB_PASSWORD"),
-            'HOST': os.getenv("P_DB_HOST"),
-            'PORT': os.getenv("P_DB_PORT"),
-            'OPTIONS': {
-                'sslmode': 'require',
-                'sslrootcert': os.path.join(BASE_DIR, 'prod-ca-2021.crt'),
-            },
+            'ENGINE': os.getenv("ENGINE"),
+            'NAME': os.getenv("DB_NAME"),
+            'USER': os.getenv("DB_USER"),
+            'PASSWORD': os.getenv("DB_PASSWORD"),
+            'HOST': os.getenv("DB_HOST"),
+            'PORT': os.getenv("DB_PORT"),
         }
-}
+    }
+else:
+    DATABASES = {
+            'default':
+            {
+                'ENGINE': os.getenv("P_ENGINE"),
+                'NAME': os.getenv("P_DB_NAME"),
+                'USER': os.getenv("P_DB_USER"),
+                'PASSWORD': os.getenv("P_DB_PASSWORD"),
+                'HOST': os.getenv("P_DB_HOST"),
+                'PORT': os.getenv("P_DB_PORT"),
+                'OPTIONS': {
+                    'sslmode': 'require',
+                    'sslrootcert': os.path.join(BASE_DIR, 'prod-ca-2021.crt'),
+                },
+            }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -179,39 +179,39 @@ SIMPLE_JWT = {
 # Two factor authentication settings
 DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOWED_ORIGINS = [
-    "https://healthline-nu.vercel.app",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "https://healthline-nu.vercel.app",
+#     "http://127.0.0.1:3000",
+#     "http://127.0.0.1:5173",
+# ]
 
-# Allow credentials if needed (e.g., cookies, session auth)
-CORS_ALLOW_CREDENTIALS = True
+# # Allow credentials if needed (e.g., cookies, session auth)
+# CORS_ALLOW_CREDENTIALS = True
 
-CORS_URLS_REGEX = r"^/api/.*$"
+# CORS_URLS_REGEX = r"^/api/.*$"
 
-# Prevent the site from being embedded in frames (mitigates clickjacking)
-X_FRAME_OPTIONS = "DENY"
+# # Prevent the site from being embedded in frames (mitigates clickjacking)
+# X_FRAME_OPTIONS = "DENY"
 
-SECURE_SSL_REDIRECT = not DEBUG
-# Adds Strict-Transport-Security header (enforces HTTPS in browsers)
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# SECURE_SSL_REDIRECT = not DEBUG
+# # Adds Strict-Transport-Security header (enforces HTTPS in browsers)
+# SECURE_HSTS_SECONDS = 31536000  # 1 year
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
 
-# Prevents browser from guessing content types
-SECURE_CONTENT_TYPE_NOSNIFF = True
+# # Prevents browser from guessing content types
+# SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# Enables XSS protection in some older browsers
-SECURE_BROWSER_XSS_FILTER = True
+# # Enables XSS protection in some older browsers
+# SECURE_BROWSER_XSS_FILTER = True
 
-# Cookie security
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+# # Cookie security
+# SESSION_COOKIE_SECURE = not DEBUG
+# CSRF_COOKIE_SECURE = not DEBUG
 
-CSRF_COOKIE_HTTPONLY = True
-CSRF_TRUSTED_ORIGINS = ["https://healthline-nu.vercel.app"]
+# CSRF_COOKIE_HTTPONLY = True
+# CSRF_TRUSTED_ORIGINS = ["https://healthline-nu.vercel.app"]
 
-SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
+# SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
