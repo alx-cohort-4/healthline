@@ -15,6 +15,7 @@ import {
   EmailConfirmation,
   ForgetPassword,
 } from "./components/auth/index";
+import PatientDirectory from "./pages/PatientDirectory/PatientDirectory";
 
 const App = () => {
   const setCountries = useCountriesStore((state) => state.setCountries);
@@ -58,6 +59,7 @@ const App = () => {
         <Route path="/email-confirmation" element={<EmailConfirmation />} />
         <Route path="/tenant/verify-email" element={<EmailVerify />} />
         <Route path="*" element={<NotFoundPage />} />
+        <Route path="/patients" element={<PatientDirectory />} />
       </Routes>
     </div>
   );
