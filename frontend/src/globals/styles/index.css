@@ -58,3 +58,6 @@
 .PhoneInputCountry {
   margin-right: 8px;
 }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
