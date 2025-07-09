@@ -29,7 +29,7 @@ def send_token_to_verify_email(email):
 def send_email(email):
     token = send_token_to_verify_email(email)
     # token_link = f"{os.getenv('FRONTEND_URL_VERIFY_EMAIL')}/tenant/verify-email/?token={token}"
-    token_link = f"{os.getenv('BACKEND_URL')}/tenant/verify-email/?token={token}"
+    token_link = f"{os.getenv('BACKEND_URL')}/verify-email/?token={token}"
     print(token_link)
 
     subject = "Email Verification"
@@ -117,7 +117,7 @@ def send_dev_email(email):
 # @shared_task
 def send_email_password_reset(email):
     token = send_token_to_verify_email(email)
-    token_link = f"{os.getenv('FRONTEND_URL_VERIFY_EMAIL')}/tenant/verify-password-reset-token/?token={token}"
+    token_link = f"{os.getenv('FRONTEND_URL_VERIFY_EMAIL')}/verify-password-reset-token/?token={token}"
     subject = "Reset Password"
 
     html_content = render_to_string(
