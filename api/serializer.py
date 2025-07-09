@@ -1,10 +1,6 @@
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
-<<<<<<< HEAD
 from tenant.models import TenantUser, Staff, AutomationScript
-=======
-from tenant.models import TenantUser, AutomationScript
->>>>>>> 5bfde57bf83688905193fdf5ab9330a82baa44fc
 from .tasks import send_email_for_update
 from django.conf import settings
 
@@ -19,14 +15,9 @@ class TenantSignUpSerializer(serializers.Serializer):
     re_enter_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
 
     def validate(self, data):
-<<<<<<< HEAD
-        # TenantUser.objects.all().delete()
-        Token.objects.all().delete()
-=======
         if settings.DEBUG:
             TenantUser.objects.all().delete()
             Token.objects.all().delete()
->>>>>>> 5bfde57bf83688905193fdf5ab9330a82baa44fc
         # Validates each field that are required to be unique
         if TenantUser.objects.filter(clinic_email=data['clinic_email']).exists():
             raise serializers.ValidationError({'email': 'email already exist'})
@@ -197,7 +188,6 @@ class StaffSignupSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
     re_enter_password = serializers.CharField(write_only=True, style={'input_type': 'password'})
 
-<<<<<<< HEAD
     def validate(self, data):
         if len(data['username']) < 3:
             raise serializers.ValidationError({'name_error': 'length of name must be greater than 2!'})
@@ -216,12 +206,6 @@ class StaffSignupSerializer(serializers.Serializer):
         return validated_data
     
 # automation serializers
-=======
-    
-
-# automation serializers
-
->>>>>>> 5bfde57bf83688905193fdf5ab9330a82baa44fc
 class AutomationScriptSerializer(serializers.Serializer):
     script_name = serializers.CharField(max_length=255)
     script_code = serializers.CharField(style={'base_template': 'textarea.html'})
@@ -237,9 +221,5 @@ class AutomationScriptSerializer(serializers.Serializer):
             script = AutomationScript.objects.create(**validated_data)
             return script
         except Exception:
-<<<<<<< HEAD
-            raise serializers.ValidationError({'error': 'failed to create script'})
-=======
             raise serializers.ValidationError({'error': 'failed to create script'})
 
->>>>>>> 5bfde57bf83688905193fdf5ab9330a82baa44fc
