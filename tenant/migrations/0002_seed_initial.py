@@ -15,9 +15,9 @@ def create_demo_tenant_and_patient(apps, schema_editor):
         address="Ikeja, Lagos",
         password="porkDemoPass12345678",  
         email_verified = False,
-        token_valid = False,
         is_active=True,
         is_staff=False,
+        token_valid = False,
     )
 
     # Create a demo patient under the tenant

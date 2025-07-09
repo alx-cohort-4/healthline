@@ -25,7 +25,11 @@ urlpatterns = [
 
     # automation routes
     # path('v1/tenant/automation/settings/', views.AutomationSettingsView.as_view(), name='automation_settings'),
+<<<<<<< HEAD
     path('v1/tenant/automation/state/', views.automation_state, name='automation_state'),       
+=======
+    path('v1/tenant/automation/state/', views.automation_state, name='automation_state'),
+>>>>>>> 5bfde57bf83688905193fdf5ab9330a82baa44fc
     path('v1/tenant/automation/scripts/', views.AutomationScriptsView.as_view(), name='automation_scripts'),
     path('v1/tenant/automation/scripts/delete/<str:script_id>/', views.AutomationScriptDeleteView.as_view(), name='automation_script_delete'),
     # path('v1/tenant/automation/scripts/<str:script_id>/', views.AutomationScriptDetailView.as_view(), name='automation_script_detail'),

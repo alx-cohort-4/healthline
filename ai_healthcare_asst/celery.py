@@ -4,7 +4,7 @@ import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ai_healthcare_asst.settings')
 celery_app = Celery('ai_healthcare_asst')
 celery_app.config_from_object('django.conf:settings', namespace='CELERY')
-celery_app.broker_connection('redis://localhost:6380/0')
+celery_app.broker_connection('redis://localhost:6379/0')
 celery_app.autodiscover_tasks()
 
 

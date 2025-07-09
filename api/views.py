@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView, UpdateAPIView
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework import status
@@ -13,7 +13,88 @@ from django.contrib.auth.models import Permission
 from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer, TenantPasswordChangeSerializer, ProfileUpdateSerializer, DeveloperSignupSerializer, StaffSignupSerializer, AutomationScriptSerializer
 from tenant.models import TenantUser, EmailDeviceOTP, Staff, Patient, AutomationScript, AutomationState
 from .tasks import send_email_password_reset, decode_token_val, send_email, send_dev_email, send_staff_email
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.hashers import make_password
+from .serializer import TenantSignUpSerializer, TenantLoginSerializer, TenantPasswordResetSerializer, TenantPasswordConfirmResetSerializer, TenantPasswordChangeSerializer, ProfileUpdateSerializer, DeveloperSignupSerializer, AutomationScriptSerializer
+from tenant.models import TenantUser, EmailDeviceOTP, AutomationState, AutomationScript
+from .tasks import send_email_password_reset, decode_token_val, send_email, send_dev_email
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+import jwt, os
 
+
+class VerifyEmailCompleteView(APIView):
+    """
+    View to handle email verification completion
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request) -> Response:
+        token = request.GET.get("token")
+        with open('public.pem', 'r') as pub_file:
+            public_key = pub_file.read()
+        try:
+            payload = jwt.decode(token, public_key, os.getenv('ALGO'))
+            if not payload:
+                return Response(data={'error': 'invalid or used token'}, status=status.HTTP_400_BAD_REQUEST)
+            user = payload.get("sub")
+            if not user:
+                return Response(data={'error': 'token is missing email info'}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.ExpiredSignatureError:
+            return Response({"message": "Token has expired"}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.InvalidTokenError:
+            return Response({"message": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user_exists = TenantUser.objects.get(clinic_email=user)
+        except TenantUser.MultipleObjectsReturned:
+            return Response(data={'error': 'multiple account found for the email'}, status=status.HTTP_400_BAD_REQUEST)
+        except TenantUser.DoesNotExist:
+            return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_404_NOT_FOUND)   
+        if user_exists.email_verified:
+            return Response(data={'error': "Tenant has already been verified"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user_exists.email_verified = True
+        user_exists.save()
+        login(request, user_exists)
+        token, _ = Token.objects.get_or_create(user=user_exists)
+        return Response(data={'success': 'user has been registered successfully', 'token': token.key}, status=status.HTTP_200_OK)
+    
+class VerifyPasswordTokenView(APIView):
+    """
+    View to handle password reset token verification
+    """
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def get(self, request) -> Response:
+        token = request.GET.get("token")
+        if not token:
+            return Response(data={'error': 'token is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            decoded_token = decode_token_val(token=token)
+            if not decoded_token:
+                return Response(data={'error': 'token is invalid or expired'}, status=status.HTTP_400_BAD_REQUEST)
+
+            email = decoded_token.get('sub')
+            if not email:
+                return Response(data={'error': 'token is missing email info'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            tenant = TenantUser.objects.get(clinic_email=email)
+            if tenant.email_verified and not tenant.token_valid:
+                pass
+
+            tenant.token_valid = True
+            tenant.save()
+            return Response(data={'success': 'token is valid'})
+
+        except TenantUser.DoesNotExist:
+            return Response(data={'error': 'no account associated with this email'}, status=status.HTTP_404_NOT_FOUND)
+        except TenantUser.MultipleObjectsReturned:
+            return Response(data={'error': 'multiple account found for this email'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(data={'error': f'an error occurred: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+    
 class TenantSignupView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
@@ -105,7 +186,7 @@ class TenantPasswordResetView(GenericAPIView):
             return Response(data={'info': 'only email is required'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data.get('clinic_email')
+            email = serializer.validated_data.get('clinic_email')            
             try:
                 tenant = TenantUser.objects.get(clinic_email=email)
                 if tenant.email_verified:
@@ -559,7 +640,7 @@ def automation_state(request):
     if request.data:
         return Response(data={'info': 'data in the body parameter is not allowed, just the token in the header'}, status=status.HTTP_400_BAD_REQUEST)
     toggle_state = request.GET.get('s')
-    automation_state, _ = AutomationState.objects.get_or_create(tenant_user=request.user)       
+    automation_state, _ = AutomationState.objects.get_or_create(tenant_user=request.user)
     if toggle_state == 'on':
         if automation_state.state:
             return Response(data={'success': 'automation is already on'}, status=status.HTTP_200_OK)
@@ -571,7 +652,7 @@ def automation_state(request):
         automation_state.state = False
         automation_state.save()
     else:
-        return Response(data={'error': 'invalid state'}, status=status.HTTP_400_BAD_REQUEST)    
+        return Response(data={'error': 'invalid state'}, status=status.HTTP_400_BAD_REQUEST)
     return Response(data={'success': 'automation state has been updated', 'state': automation_state.state}, status=status.HTTP_200_OK)
 
 
@@ -601,11 +682,9 @@ class AutomationScriptDeleteView(APIView):
         script_id = kwargs.get('script_id')
         try:
             script = AutomationScript.objects.get(id=script_id)
-        except Exception as e:
-            print(e)
+        except AutomationScript.DoesNotExist:
             return Response(data={'error': 'script does not exist'}, status=status.HTTP_400_BAD_REQUEST)
         if script.tenant_user != request.user:
             return Response(data={'error': 'you are not allowed to delete this script'}, status=status.HTTP_400_BAD_REQUEST)
         script.delete()
         return Response(data={'success': 'automation script has been deleted'}, status=status.HTTP_200_OK)
-

@@ -9,7 +9,7 @@ SECRET_KEY = os.getenv("TOP_KEY")
 DEBUG = os.getenv("DEBUG", "False") == "True"
 # DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "healthline.onrender.com"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "healthline.onrender.com", "testhealthline.onrender.com"]
 
 # Application definition
 
@@ -143,6 +143,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -163,12 +164,12 @@ else:
     EMAIL_PORT = os.getenv("P_EMAIL_PORT")
     EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
     EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
-    EMAIL_USE_SSL = os.getenv("P_EMAIL_USE_SSL")
+    EMAIL_USE_TLS = os.getenv("P_EMAIL_USE_TLS")
 
 LOGIN_URL = 'two_factor:login'
 LOGOUT_REDIRECT_URL = "/tenant/login/"
 
-CELERY_BROKER_URL="redis://localhost:6380/0"
+CELERY_BROKER_URL="redis://localhost:6379/0"
 
 SIMPLE_JWT = {
         'SIGNING_KEY': open('private.pem', 'r'),
@@ -177,7 +178,7 @@ SIMPLE_JWT = {
     }
 
 # Two factor authentication settings
-DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
+# DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -195,11 +196,12 @@ CORS_URLS_REGEX = r"^/api/.*$"
 # Prevent the site from being embedded in frames (mitigates clickjacking)
 X_FRAME_OPTIONS = "DENY"
 
-SECURE_SSL_REDIRECT = not DEBUG
+# Only enable SSL redirect in production
+SECURE_SSL_REDIRECT = False if DEBUG else True
 # Adds Strict-Transport-Security header (enforces HTTPS in browsers)
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 year in production, 0 in development
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
 
 # Prevents browser from guessing content types
 SECURE_CONTENT_TYPE_NOSNIFF = True

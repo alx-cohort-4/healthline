@@ -9,7 +9,12 @@
                     {% else %}alert-{{ message.tags }}{% endif %}
                     alert-dismissible fade show d-flex justify-content-between align-items-center w-100"
                 role="alert">
-                <div>{{ message }}</div>
+                {% if message.value == 'Please verify your email address' %}
+                    <div>{{ message }}</div>
+                    <a href="{% url 'tenant:verify_email' %}" class="btn btn-primary">Verify Email</a>
+                {% else %}
+                    <div>{{ message }}</div>
+                {% endif %}
                 <button type="button" class="btn-close ms-3" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}

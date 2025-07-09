@@ -286,5 +286,3 @@ class AutomationScript(TenantModelMixin, models.Model):
 
     def __str__(self):
         return f"{self.tenant_user.clinic_name} - {self.script_name}"
-    
-

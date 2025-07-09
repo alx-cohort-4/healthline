@@ -10,8 +10,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse, Http404
 from datetime import date
+import os, jwt
 from .models import TenantUser, Patient
-from .token import send_email
 from . import forms
 
 class HomeView(LoginRequiredMixin, generic.ListView, FormView):
@@ -32,31 +32,39 @@ class HomeView(LoginRequiredMixin, generic.ListView, FormView):
         try:
             # Ensure that tenant really exist
             tenant = TenantUser.objects.get(clinic_email=self.request.user)
+            if tenant.email_verified == False:
+                messages.error(self.request, message="Email not verified. Please verify your email address")
+                # return redirect(reverse_lazy("tenant:verify_email"))
         except TenantUser.DoesNotExist:
             raise Http404("Tenant does not exist")
         return Patient.objects.filter(tenant_user=tenant)
-    
-def testing(request):
-    email = request.user
-    username = request.user.clinic_name
-    send_email(email=email, user=username)
-    return render(request, "tenant/email_message.html", {'email': email, 'name': username})
 
 class SignupPage(FormView):
     template_name = "tenant/sign_up.html"
     form_class = forms.TenantUserForm
-    success_url = "tenant:home"
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_form(self.form_class)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            print("Logged user in")
-            messages.success(request, message=f"Successfully logged in as {user.clinic_name}")
-            return redirect(reverse_lazy(self.success_url))
-        print(form.errors)
-        return super().post(request, *args, **kwargs)
+    success_url = reverse_lazy("tenant:home")
+    
+    def form_valid(self, form):
+        user = form.save()
+        login(self.request, user)
+        messages.success(self.request, f"Successfully logged in as {user.clinic_name}")
+        
+        # Send verification email
+        # email = user.clinic_email
+        # username = user.clinic_name
+        # # send_email.delay(email=email, user=username)
+        return render(self.request, "tenant/email_message.html", {'email': email, 'name': username})
+    # def post(self, request, *args, **kwargs):
+    #     form = self.get_form(self.form_class)
+    #     if form.is_valid():
+    #         user = form.save()
+    #         login(request, user)
+    #         print("Logged user in")
+    #         messages.success(request, message=f"Successfully logged in as {user.clinic_name}")
+    #         return testing()
+    #         return redirect(reverse_lazy(self.success_url))
+    #     print(form.errors)
+    #     return super().post(request, *args, **kwargs)
     
 class LoginPage(FormView):
     template_name = "tenant/login.html"
@@ -68,13 +76,18 @@ class LoginPage(FormView):
         if form.is_valid():
             email = form.cleaned_data.get('clinic_email')
             password = form.cleaned_data.get('password')
-            print(email, password)
+            # print(email, password)
             user = authenticate(request, clinic_email=email, password=password)
-            if user:
+            if user and user.email_verified == True:
                 login(request, user)
                 messages.success(request, message=f"Successfully logged in as {user.clinic_name}")
                 return redirect(reverse_lazy(self.success_url))
-            messages.error(request, message="Email or password is incorrect")
+            else:
+                # Send verification email regardless of whether user exists or not
+                # send_email.delay(email=email, user=email.split('@')[0])
+                messages.info(request, message="If an account exists with this email, a verification link has been sent.")
+                return render(request, "tenant/email_message.html", {'email': email, 'name': email.split('@')[0]})
+        messages.error(request, message="Email or password is incorrect")
         return self.form_invalid(form)
 
 class PatientFormView(LoginRequiredMixin, FormView):
@@ -100,6 +113,8 @@ class PatientFormView(LoginRequiredMixin, FormView):
                 messages.success(request, message=f"{patient} has been added to list successfully")
                 return redirect(reverse_lazy(self.success_url))
         return super().post(request, *args, **kwargs)
+    
+
     
 @login_required
 def logout_user(request):
