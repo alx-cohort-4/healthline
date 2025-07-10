@@ -159,12 +159,18 @@ if DEBUG:
     EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL") == "True"
 
 else:
-    EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
-    EMAIL_HOST = os.getenv("P_EMAIL_HOST")
-    EMAIL_PORT = os.getenv("P_EMAIL_PORT")
-    EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
-    EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
-    EMAIL_USE_TLS = os.getenv("P_EMAIL_USE_TLS")
+    # EMAIL_BACKEND = os.getenv("P_EMAIL_BACKEND")
+    # EMAIL_HOST = os.getenv("P_EMAIL_HOST")
+    # EMAIL_PORT = os.getenv("P_EMAIL_PORT")
+    # EMAIL_HOST_USER = os.getenv("P_EMAIL_HOST_USER")
+    # EMAIL_HOST_PASSWORD = os.getenv("P_EMAIL_HOST_PASSWORD")
+    # EMAIL_USE_TLS = os.getenv("P_EMAIL_USE_TLS")
+    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
+    EMAIL_HOST = os.getenv("EMAIL_HOST")
+    EMAIL_PORT = os.getenv("EMAIL_PORT")
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL") == "True"
 
 LOGIN_URL = 'two_factor:login'
 LOGOUT_REDIRECT_URL = "/tenant/login/"
